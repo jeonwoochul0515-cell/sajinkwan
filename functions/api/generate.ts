@@ -52,7 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         input: {
           image: base64Image,
           prompt: promptText,
-          negative_prompt: "blurry, low quality, distorted face, changed face, different person, deformed features, bad anatomy, disfigured",
+          negative_prompt: "mobile phone, smartphone, modern cars, neon lights, makeup, plastic surgery face, anime style, cartoon, sketch, 3d render, blurry, low quality, distorted face, changed face, different person, deformed features, bad anatomy, disfigured, digital look, overly smooth skin, airbrushed",
           num_inference_steps: 30,
           guidance_scale: 5,
           ip_adapter_scale: 0.8,               // 얼굴 디테일 보존 강도 (높을수록 원본 얼굴 유지)

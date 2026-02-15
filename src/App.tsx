@@ -43,11 +43,25 @@ function App() {
       // 이미지를 base64로 변환
       const base64Image = await toBase64(selectedFile);
 
-      // 프롬프트(명령어) 설정 - 얼굴은 절대 변경하지 않고 옷과 배경만 변경
-      let promptText = "a person wearing Korean vintage black school uniform, 1970s retro Korean school photo, old film photograph, sepia tone background, studio portrait, same face, identical facial features";
-      if (styleOption === 'military_training') {
-        promptText = "a person wearing Korean military training uniform Kyoryunbok, camouflage pattern uniform, 1980s Korean school photo, old film photograph, outdoor background, same face, identical facial features";
+      // 페르소나: 1980년대 충무로 사진관 장인
+      // 필름 질감 + 아날로그 조명 + 한국적 디테일을 조합한 마스터 프롬프트
+      const MASTER_PROMPT =
+        "analog film photo, shot on Kodak Gold 200, " +
+        "realistic texture, skin pores, film grain, grainy film texture, " +
+        "slightly out of focus background, vintage color grading, " +
+        "flash photography, harsh lighting, vignette, " +
+        "1980s South Korea context";
+
+      // 스타일별 구체적 주문
+      let specificPrompt = "";
+      if (styleOption === 'school_uniform') {
+        specificPrompt = "a person wearing black Gakuran school uniform with stand collar tunic, white plastic name tag on chest, retro Korean high school student, old seoul street background, concrete wall, slate grey sky";
+      } else if (styleOption === 'military_training') {
+        specificPrompt = "a person wearing 1980s Korean leopard camouflage military training uniform Kyoryunbok, drilling ground background, outdoor field, retro Korean school military training";
       }
+
+      // 최종 프롬프트 합체
+      const promptText = `${specificPrompt}, ${MASTER_PROMPT}, masterpiece, best quality`;
 
       // 우리 백엔드 API(/api/generate)를 호출
       const response = await fetch('/api/generate', {
