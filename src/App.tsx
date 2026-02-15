@@ -6,6 +6,7 @@ function App() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [styleOption, setStyleOption] = useState('school_uniform'); // 기본값: 검정 교복
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,16 +64,12 @@ function App() {
       // 최종 프롬프트 합체
       const promptText = `${specificPrompt}, ${MASTER_PROMPT}, masterpiece, best quality`;
 
-      // 우리 백엔드 API(/api/generate)를 호출
+      // 1단계: 백엔드에 예측 시작 요청
+      setLoadingMsg('사진관 아저씨가 필름을 꺼내고 있습니다...');
       const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          base64Image,
-          promptText,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64Image, promptText }),
       });
 
       if (!response.ok) {
@@ -86,8 +83,45 @@ function App() {
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      setResultUrl(data.resultUrl);
+      const { predictionId } = await response.json();
+
+      // 2단계: 클라이언트에서 폴링 (서버 subrequest 제한 회피)
+      const statusMessages = [
+        '암실에서 현상액을 준비하고 있습니다...',
+        '필름에 빛을 쬐고 있습니다...',
+        '인화지에 상이 떠오르고 있습니다...',
+        '색감을 보정하고 있습니다...',
+        '거의 다 됐습니다, 조금만 기다려주세요...',
+      ];
+      let pollCount = 0;
+
+      while (true) {
+        await new Promise(r => setTimeout(r, 2000)); // 2초 간격 폴링
+        setLoadingMsg(statusMessages[Math.min(pollCount, statusMessages.length - 1)]);
+        pollCount++;
+
+        const statusRes = await fetch('/api/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ predictionId }),
+        });
+
+        const statusData = await statusRes.json();
+
+        if (statusData.status === 'succeeded') {
+          setResultUrl(statusData.resultUrl);
+          break;
+        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+          throw new Error(statusData.error || '변환에 실패했습니다.');
+        } else if (statusData.error) {
+          throw new Error(statusData.error);
+        }
+
+        // 2분 타임아웃
+        if (pollCount > 60) {
+          throw new Error('변환 시간이 너무 오래 걸립니다. 다시 시도해주세요.');
+        }
+      }
 
     } catch (err: any) {
       console.error(err);
@@ -139,7 +173,7 @@ function App() {
         {/* 오른쪽: 결과 창 */}
         <div className="card result-section">
           <h3>3. 변환 결과</h3>
-          {isLoading && <div className="placeholder"><p>사진을 변환하고 있습니다...</p></div>}
+          {isLoading && <div className="placeholder"><p>{loadingMsg || '사진을 변환하고 있습니다...'}</p></div>}
           {error && <div className="placeholder"><p style={{color: 'red'}}>에러: {error}</p></div>}
           {resultUrl && (
             <div className="result-image">
