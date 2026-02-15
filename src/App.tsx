@@ -43,10 +43,10 @@ function App() {
       // 이미지를 base64로 변환
       const base64Image = await toBase64(selectedFile);
 
-      // 프롬프트(명령어) 설정
-      let promptText = "Korean vintage school uniform, black uniform, 1970s retro style";
+      // 프롬프트(명령어) 설정 - 얼굴은 절대 변경하지 않고 옷과 배경만 변경
+      let promptText = "a person wearing Korean vintage black school uniform, 1970s retro Korean school photo, old film photograph, sepia tone background, studio portrait, same face, identical facial features";
       if (styleOption === 'military_training') {
-        promptText = "Korean retro military training school uniform (Kyoryunbok), camouflage pattern, 1980s vibe";
+        promptText = "a person wearing Korean military training uniform Kyoryunbok, camouflage pattern uniform, 1980s Korean school photo, old film photograph, outdoor background, same face, identical facial features";
       }
 
       // 우리 백엔드 API(/api/generate)를 호출

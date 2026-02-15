@@ -1,28 +1,11 @@
 // functions/api/generate.ts
 
-// Replicate API 요청을 위한 타입 정의
-interface ReplicateRequest {
-  version: string;
-  input: {
-    input_image: string;
-    prompt: string;
-    num_steps: number;
-    style_strength_ratio: number;
-  };
-}
-
 // Replicate API 응답을 위한 타입 정의
 interface ReplicateResponse {
   id: string;
   status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
-  version: string;
-  input: ReplicateRequest['input'];
   output?: string[] | null;
   error?: string | null;
-  logs?: string | null;
-  metrics?: {
-    predict_time?: number;
-  };
   urls: {
     get: string;
     cancel: string;
@@ -57,7 +40,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // 1. Replicate에 예측 시작 요청 보내기
+    // 1. Replicate에 예측 시작 요청 보내기 (InstantID - 얼굴 보존 특화 모델)
     const startResponse = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
@@ -65,12 +48,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4", // PhotoMaker 모델 버전
+        version: "2e4785a4d80dadf580077b2244c8d7c05d8e3faac04a04c02d8e099dd2876789", // InstantID 최신 버전
         input: {
-          input_image: base64Image,
-          prompt: promptText + ", person img, realistic, 8k, film grain, old photo texture",
-          num_steps: 30,
-          style_strength_ratio: 35
+          image: base64Image,
+          prompt: promptText,
+          negative_prompt: "blurry, low quality, distorted face, changed face, different person, deformed features, bad anatomy, disfigured",
+          num_inference_steps: 30,
+          guidance_scale: 5,
+          ip_adapter_scale: 0.8,               // 얼굴 디테일 보존 강도 (높을수록 원본 얼굴 유지)
+          controlnet_conditioning_scale: 0.8,   // 얼굴 구조 보존 강도 (높을수록 원본 얼굴 유지)
+          enhance_nonface_region: true,          // 얼굴 외 영역(배경/옷)만 강화
+          output_format: "png",
+          output_quality: 90,
+          disable_safety_checker: true,
         }
       })
     });
@@ -94,18 +84,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
       prediction = await getResponse.json();
       if (getResponse.status !== 200) {
-        return new Response(JSON.stringify({ error: prediction.error }), { status: 500 });
+        return new Response(JSON.stringify({ error: prediction.error || `Polling error (${getResponse.status})` }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
     }
 
     // 3. 최종 결과를 프론트엔드로 반환
     if (prediction.status === 'succeeded' && prediction.output) {
-      return new Response(JSON.stringify({ resultUrl: prediction.output[0] }), {
+      const resultUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
+      return new Response(JSON.stringify({ resultUrl }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      return new Response(JSON.stringify({ error: 'Prediction failed or was canceled.' }), {
+      return new Response(JSON.stringify({ error: prediction.error || 'Prediction failed or was canceled.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
