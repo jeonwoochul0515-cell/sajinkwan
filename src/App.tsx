@@ -62,8 +62,14 @@ function App() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '알 수 없는 에러가 발생했습니다.');
+        let errorMessage = '알 수 없는 에러가 발생했습니다.';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = `서버 응답 오류 (상태코드: ${response.status})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

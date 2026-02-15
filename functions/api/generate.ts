@@ -65,9 +65,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       })
     });
 
-    let prediction: ReplicateResponse = await startResponse.json();
+    const responseText = await startResponse.text();
+    let prediction: ReplicateResponse;
+    try {
+      prediction = JSON.parse(responseText);
+    } catch {
+      console.error('Replicate API 응답 파싱 실패:', responseText);
+      return new Response(JSON.stringify({ error: `Replicate API 응답 오류: ${responseText.substring(0, 200)}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     if (startResponse.status !== 201) {
-      return new Response(JSON.stringify({ error: prediction.error || `Replicate API error (${startResponse.status})` }), {
+      console.error('Replicate API 에러:', prediction.error, 'Status:', startResponse.status);
+      return new Response(JSON.stringify({ error: prediction.error || `Replicate API 에러 (상태코드: ${startResponse.status})` }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -106,8 +117,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred.' }), {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Generate API error:', message, error);
+    return new Response(JSON.stringify({ error: `서버 오류가 발생했습니다: ${message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
