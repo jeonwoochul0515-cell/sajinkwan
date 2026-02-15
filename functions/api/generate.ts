@@ -4,7 +4,7 @@
 interface ReplicateRequest {
   version: string;
   input: {
-    image: string;
+    input_image: string;
     prompt: string;
     num_steps: number;
     style_strength_ratio: number;
@@ -65,19 +65,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "ddfc2b03d50f21887c8cf294505e5c58742e78db761e58b12b7407074d029", // PhotoMaker 모델 버전
+        version: "ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4", // PhotoMaker 모델 버전
         input: {
-          image: base64Image,
-          prompt: promptText + ", realistic, 8k, film grain, old photo texture",
+          input_image: base64Image,
+          prompt: promptText + ", person img, realistic, 8k, film grain, old photo texture",
           num_steps: 30,
-          style_strength_ratio: 20
+          style_strength_ratio: 35
         }
       })
     });
 
     let prediction: ReplicateResponse = await startResponse.json();
     if (startResponse.status !== 201) {
-      return new Response(JSON.stringify({ error: prediction.error }), { status: 500 });
+      return new Response(JSON.stringify({ error: prediction.error || `Replicate API error (${startResponse.status})` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 2. 결과가 나올 때까지 폴링 (일정 간격으로 확인)
