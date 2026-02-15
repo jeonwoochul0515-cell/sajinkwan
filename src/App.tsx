@@ -4,7 +4,7 @@ import './App.css';
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [styleOption, setStyleOption] = useState('school_uniform'); // 기본값: 검정 교복
+  const [styleOption, setStyleOption] = useState('male_uniform'); // 기본값: 남학생 교복
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -44,25 +44,54 @@ function App() {
       // 이미지를 base64로 변환
       const base64Image = await toBase64(selectedFile);
 
-      // 페르소나: 1980년대 충무로 사진관 장인
-      // 필름 질감 + 아날로그 조명 + 한국적 디테일을 조합한 마스터 프롬프트
+      // 마스터 프롬프트: 영화 클래식/친구/말죽거리잔혹사 기반
+      // 얼굴은 절대 변경하지 않음 (same face 강조)
       const MASTER_PROMPT =
-        "analog film photo, shot on Kodak Gold 200, " +
-        "realistic texture, skin pores, film grain, grainy film texture, " +
-        "slightly out of focus background, vintage color grading, " +
-        "flash photography, harsh lighting, vignette, " +
-        "1980s South Korea context";
+        "analog film photograph, shot on Kodak Gold 200, " +
+        "natural film grain, vintage color grading, soft warm tone, " +
+        "1970s 1980s South Korea, " +
+        "preserve original face exactly, same face, identical face, do not change face";
 
-      // 스타일별 구체적 주문
+      // 스타일별 프롬프트 (영화 3편 기반)
       let specificPrompt = "";
-      if (styleOption === 'school_uniform') {
-        specificPrompt = "a person wearing 1970s 1980s Korean school uniform, black stand-up collar tunic jacket with brass buttons, mandarin collar, white dress shirt underneath, white plastic name tag pinned on chest, black straight-leg trousers, Korean retro high school student ID photo, old Korean photo studio backdrop, concrete wall, slate grey sky, NOT western blazer, NOT british school uniform, NOT tie, NOT plaid";
+      if (styleOption === 'male_uniform') {
+        // 남학생 교복: 영화 친구/말죽거리잔혹사 스타일
+        // 검정 입학(학란) + 금속 단추 + 하얀 와이셔츠 + 명찰
+        specificPrompt =
+          "a male student wearing black Korean Hankbok school uniform, " +
+          "black stand-up collar tunic with 5 brass metal buttons in a row, " +
+          "stiff mandarin collar buttoned to the top, white dress shirt visible at collar, " +
+          "white rectangular plastic name tag on left chest, " +
+          "short buzz cut hair or crew cut, " +
+          "background: old Korean school corridor with grey concrete walls and wooden doors, " +
+          "or old narrow Korean alley with low brick walls and slate rooftops, " +
+          "studio portrait with flash";
+      } else if (styleOption === 'female_uniform') {
+        // 여학생 교복: 영화 클래식 스타일
+        // 검정 세일러 아닌 한국식 = 하얀 블라우스 + 검정 조끼/점퍼스커트
+        specificPrompt =
+          "a female student wearing 1970s Korean girl school uniform, " +
+          "white round-collar blouse with black jumper skirt below the knee, " +
+          "or white blouse with dark navy vest and black pleated skirt, " +
+          "white socks and black flat shoes, hair in two braids or short bob with hair pin, " +
+          "background: old Korean school campus with cherry blossom trees, " +
+          "or retro Korean street with old signboards and concrete buildings, " +
+          "studio portrait with flash";
       } else if (styleOption === 'military_training') {
-        specificPrompt = "a person wearing 1980s Korean leopard camouflage military training uniform Kyoryunbok, drilling ground background, outdoor field, retro Korean school military training";
+        // 교련복: 영화 말죽거리잔혹사 스타일
+        // 카키색 교련복 + 전투모
+        specificPrompt =
+          "a student wearing 1970s 1980s Korean military training uniform Kyoryunbok, " +
+          "olive khaki green uniform jacket and trousers, " +
+          "matching olive green military cap on head, black military boots, " +
+          "standing at attention, " +
+          "background: dusty school dirt playground with goalposts, " +
+          "or open field drill ground with Korean school building behind, " +
+          "outdoor harsh sunlight";
       }
 
       // 최종 프롬프트 합체
-      const promptText = `${specificPrompt}, ${MASTER_PROMPT}, masterpiece, best quality`;
+      const promptText = `${specificPrompt}, ${MASTER_PROMPT}, masterpiece, best quality, photorealistic`;
 
       // 1단계: 백엔드에 예측 시작 요청
       setLoadingMsg('사진관 아저씨가 필름을 꺼내고 있습니다...');
@@ -157,8 +186,9 @@ function App() {
             onChange={(e) => setStyleOption(e.target.value)}
             className="style-select"
           >
-            <option value="school_uniform">검정 옛날 교복 (남/녀)</option>
-            <option value="military_training">얼룩무늬 교련복</option>
+            <option value="male_uniform">남학생 교복 (친구/말죽거리 스타일)</option>
+            <option value="female_uniform">여학생 교복 (클래식 스타일)</option>
+            <option value="military_training">교련복 (말죽거리 스타일)</option>
           </select>
 
           <button 
