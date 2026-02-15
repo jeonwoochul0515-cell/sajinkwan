@@ -55,7 +55,7 @@ function App() {
       // 스타일별 구체적 주문
       let specificPrompt = "";
       if (styleOption === 'school_uniform') {
-        specificPrompt = "a person wearing black Gakuran school uniform with stand collar tunic, white plastic name tag on chest, retro Korean high school student, old seoul street background, concrete wall, slate grey sky";
+        specificPrompt = "a person wearing 1970s 1980s Korean school uniform, black stand-up collar tunic jacket with brass buttons, mandarin collar, white dress shirt underneath, white plastic name tag pinned on chest, black straight-leg trousers, Korean retro high school student ID photo, old Korean photo studio backdrop, concrete wall, slate grey sky, NOT western blazer, NOT british school uniform, NOT tie, NOT plaid";
       } else if (styleOption === 'military_training') {
         specificPrompt = "a person wearing 1980s Korean leopard camouflage military training uniform Kyoryunbok, drilling ground background, outdoor field, retro Korean school military training";
       }
