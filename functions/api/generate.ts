@@ -38,9 +38,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           prompt: promptText,
           negative_prompt: negativePrompt,
           style_name: styleName,
-          num_steps: 30,
-          guidance_scale: 6,
-          style_strength_ratio: 35,
+          num_steps: 50,
+          guidance_scale: 5,
+          style_strength_ratio: 20,
           num_outputs: 1,
           disable_safety_checker: true,
         }

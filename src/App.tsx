@@ -65,111 +65,96 @@ const STYLE_CONFIGS: Record<string, { prompt: string; photomakerStyle: string }>
   male_uniform: {
     // 한국 남학생 교복: 검정 차이나칼라 (입깃), 1969-1983 전국 통일 교복
     // 출처: 한국민족문화대백과 "차이나칼라 교복", 말죽거리잔혹사 고증
-    prompt: "a 17 year old Korean male student img wearing authentic 1970s Korean high school uniform, " +
-      "black stiff stand-up collar jacket (china collar, ipkit 입깃), five silver or brass hook closures down the front instead of buttons, " +
-      "collar buttoned all the way to the top in strict school rule, white cotton dress shirt visible at collar edge, " +
-      "rectangular white plastic name tag pinned on left chest pocket with student name and class number in Korean, " +
-      "black straight-leg trousers with sharp front crease, " +
-      "17 year old youthful face, slim teenage boy physique, short military-style buzz cut hair (kkakka meori 까까머리), " +
-      "serious disciplined expression, standing upright posture",
+    prompt: "a photo of img, Korean male high school student wearing authentic 1970s uniform, " +
+      "black stand-up collar jacket (china collar ipkit 입깃) with five metal hook closures, " +
+      "collar buttoned to top, white dress shirt visible at collar, " +
+      "white plastic name tag on left chest pocket, " +
+      "black straight trousers, short hair, standing posture",
     photomakerStyle: "Photographic (Default)",
   },
   female_uniform: {
     // 한국 여학생 교복: 흰 블라우스 + 검정 조끼/점퍼스커트
     // 출처: YTN 교복 변천사, 1970년대 여학교 사진 자료
-    prompt: "a 17 year old Korean female student img wearing authentic 1970s Korean girl high school uniform, " +
-      "crisp white round peter pan collar blouse with long sleeves, " +
-      "black sleeveless vest or black knee-length jumper dress (jumper skirt) worn over the blouse, " +
-      "dark navy or black pleated wool skirt reaching below the knee (modest length), " +
-      "white ankle socks and simple black flat Mary Jane shoes, " +
-      "17 year old youthful face, slim teenage girl physique, " +
-      "hair in two neat braids with ribbons or short bob cut with simple black hair pins, " +
-      "gentle modest expression, proper posture with hands clasped in front",
+    prompt: "a photo of img, Korean female high school student wearing authentic 1970s uniform, " +
+      "white peter pan collar blouse with long sleeves, " +
+      "black sleeveless vest or black jumper skirt over blouse, " +
+      "dark pleated skirt below knee, " +
+      "white socks and black Mary Jane shoes, " +
+      "neat hairstyle, proper posture with hands clasped",
     photomakerStyle: "Photographic (Default)",
   },
   military_training: {
     // 교련복: 학도호국단 후신, 1969년 신설, 얼룩무늬
     // 출처: 한국민족문화대백과 "교련복", 1968 청와대 습격 사건 이후 도입
-    prompt: "a 17 year old Korean student img wearing authentic 1970s Korean military training uniform (Kyoryunbok 교련복), " +
-      "olive khaki or black-white camouflage pattern long-sleeve shirt with patch pockets on both chest, " +
-      "matching camouflage or olive trousers tucked into black combat boots or tied at ankles, " +
-      "olive green beret cap or camouflage patrol cap worn straight, " +
-      "standing at attention military posture with arms straight at sides, " +
-      "17 year old youthful face, slim fit teenage athletic physique, short buzz cut hair, " +
-      "serious disciplined military-style expression",
+    prompt: "a photo of img wearing 1970s Korean military training uniform (Kyoryunbok 교련복), " +
+      "olive or camouflage long-sleeve shirt with chest pockets, " +
+      "matching trousers tucked into black combat boots, " +
+      "olive beret or patrol cap, " +
+      "standing at attention posture",
     photomakerStyle: "Photographic (Default)",
   },
   graduation: {
     // 졸업 증명사진: 정면 응시, 검정 교복, 1970년대 스튜디오
-    prompt: "a 17 year old Korean student img in formal 1970s graduation ID photo, " +
-      "wearing perfectly pressed black school uniform with china collar buttoned to top, " +
-      "white name tag clearly visible on chest, " +
-      "facing directly forward at camera with neutral serious expression, shoulders square, " +
-      "17 year old youthful face, slim teenage build, neatly combed short hair for boys or neat braids for girls, " +
-      "professional studio portrait lighting with slight shadow on one side, " +
-      "formal stiff posture like official ID photograph",
+    prompt: "a formal 1970s Korean graduation photo of img, " +
+      "wearing black school uniform with china collar buttoned to top, " +
+      "white name tag on chest, " +
+      "facing forward, shoulders square, neat hair, " +
+      "professional studio portrait lighting, formal ID photograph style",
     photomakerStyle: "Photographic (Default)",
   },
   picnic: {
     // 소풍: 1970-80년대 경주/설악산/공주 등, 김밥 도시락
     // 출처: 국가기록원 "소풍", 1970년대 학교 앨범 자료
-    prompt: "a 17 year old Korean student img on school picnic excursion in 1980s Korea, " +
-      "wearing casual comfortable clothes layered over parts of school uniform, light jacket or cardigan, " +
-      "carrying an old canvas backpack and metal canteen with strap over shoulder, " +
-      "walking or sitting in relaxed posture with classmates in background blur, " +
-      "17 year old youthful energetic face with happy smile, slim active teenage physique, " +
-      "casual messy windblown hair, candid snapshot feel not posed",
+    prompt: "a photo of img on 1980s Korean school picnic, " +
+      "wearing casual jacket or cardigan over uniform parts, " +
+      "carrying old canvas backpack and metal canteen, " +
+      "relaxed posture, candid snapshot feel",
     photomakerStyle: "Photographic (Default)",
   },
   gym_class: {
     // 체육 시간: 흰 티셔츠 + 남색 짧은 반바지, 1970년대
-    prompt: "a 17 year old Korean student img in 1970s school gym class (체육 시간), " +
-      "wearing plain white short-sleeve cotton t-shirt and navy blue short athletic shorts (bloomer style for girls before 1990s), " +
-      "white sneakers with no brand logos, white crew socks, " +
-      "mid-action doing jumping jacks or running or stretching exercise, " +
-      "17 year old youthful athletic face, slim fit teenage active physique, " +
-      "hair tied back for girls or short for boys, energetic expression, outdoor lighting",
+    prompt: "a photo of img in 1970s Korean school gym class, " +
+      "wearing white short-sleeve t-shirt and navy blue athletic shorts, " +
+      "white sneakers and white socks, " +
+      "mid-action exercise pose, outdoor lighting",
     photomakerStyle: "Photographic (Default)",
   },
   classroom: {
     // 교실 일상: 나무 책상, 녹색 칠판, 형광등, 1970년대
-    prompt: "a 17 year old Korean student img sitting at dark wooden school desk in 1970s classroom, " +
-      "wearing black school uniform, hunched over open textbook and notebook writing with pencil, " +
-      "wooden desk with carved graffiti and scratches, green chalkboard with Korean writing visible in background, " +
-      "fluorescent tube lights overhead creating harsh shadows, " +
-      "17 year old youthful studious face, slim teenage build, " +
-      "hair slightly messy from long study hours, tired but focused expression, candid moment not posed",
+    prompt: "a photo of img sitting at wooden desk in 1970s Korean classroom, " +
+      "wearing black school uniform, writing in notebook, " +
+      "green chalkboard visible in background, " +
+      "fluorescent overhead lighting, candid moment",
     photomakerStyle: "Photographic (Default)",
   },
   group_photo: {
     // 단체 사진: 운동장 정렬, 교복, 1970년대 반 사진
     // 출처: 수학여행 단체 사진, 졸업 앨범 자료
-    prompt: "a 17 year old Korean student img posing in class group photo formation 1970s style, " +
-      "wearing neat black school uniform with collar buttoned properly, " +
-      "standing in organized rows with classmates blurred in background, " +
-      "arms crossed in front of chest or hands clasped behind back in formal pose, " +
-      "17 year old youthful face with slight awkward smile, slim teenage build, neatly combed hair, " +
-      "stiff formal posture, taken with vintage camera flash creating slight overexposure",
+    prompt: "a photo of img in 1970s Korean class group photo, " +
+      "wearing black school uniform with collar buttoned, " +
+      "standing in rows with classmates in background, " +
+      "formal pose, vintage camera flash lighting",
     photomakerStyle: "Photographic (Default)",
   },
 };
 
-// ===== 부정 프롬프트: 일본식 요소 명시 차단 =====
+// ===== 부정 프롬프트: 일본식 요소 명시 차단 + 얼굴 변경 강력 차단 =====
 const NEGATIVE_PROMPT =
+  "different face, changed face, different person, face swap, face morph, face replacement, " +
   "gakuran, japanese school uniform, sailor fuku, blazer, necktie, suspenders, " +
   "western school uniform, british uniform, plaid pattern, " +
   "modern clothes, hoodie, sneakers with logos, " +
-  "different face, face swap, ugly, deformed, blurry, low quality, " +
+  "ugly, deformed, blurry, low quality, " +
   "anime, cartoon, manga style, 3d render, digital painting, " +
-  "plastic surgery face, k-pop idol face, mature adult body, overweight, muscular bodybuilder, " +
-  "wrinkles, aged skin, grey hair";
+  "plastic surgery face, k-pop idol face, " +
+  "nsfw, nudity";
 
 const MASTER_SUFFIX =
-  "analog film photograph shot on Kodak Gold 200 or Fuji Superia 400, " +
-  "natural film grain and slight color shift, vintage faded warm tone with slight yellow cast, " +
-  "1970s 1980s South Korea authentic period photo, " +
-  "photorealistic documentary style, " +
-  "NOT japanese NOT anime";
+  "preserve original face and facial features exactly as input, " +
+  "analog film photograph on Kodak Gold 200, " +
+  "film grain, vintage warm tone, " +
+  "1970s 1980s South Korea period photo, " +
+  "photorealistic style";
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
