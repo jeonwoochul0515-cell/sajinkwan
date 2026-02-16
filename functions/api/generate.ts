@@ -1,5 +1,5 @@
 // functions/api/generate.ts
-// 역할: Replicate에 예측 시작만 요청하고, prediction ID를 반환
+// 역할: Replicate PhotoMaker 모델에 예측 시작 요청, prediction ID 반환
 
 interface Env {
   REPLICATE_API_TOKEN: string;
@@ -8,12 +8,14 @@ interface Env {
 interface RequestBody {
   base64Image: string;
   promptText: string;
+  negativePrompt: string;
+  styleName: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const { request, env } = context;
-    const { base64Image, promptText } = await request.json<RequestBody>();
+    const { base64Image, promptText, negativePrompt, styleName } = await request.json<RequestBody>();
 
     if (!env.REPLICATE_API_TOKEN) {
       return new Response(JSON.stringify({ error: 'REPLICATE_API_TOKEN is not set' }), {
@@ -22,7 +24,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Replicate에 예측 시작 요청 (폴링 없이 바로 반환)
+    // PhotoMaker 모델 호출 (InstantID 대비 4.5배 저렴, 4배 빠름)
     const startResponse = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
@@ -30,18 +32,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "2e4785a4d80dadf580077b2244c8d7c05d8e3faac04a04c02d8e099dd2876789",
+        version: "ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4",
         input: {
-          image: base64Image,
+          input_image: base64Image,
           prompt: promptText,
-          negative_prompt: "different face, changed face, ugly face, distorted face, deformed face, face swap, western blazer, british school uniform, hogwarts, necktie with suit, plaid skirt, preppy style, japanese sailor fuku, modern school uniform, mobile phone, smartphone, modern cars, neon lights, anime style, cartoon, sketch, 3d render, blurry, low quality, deformed features, bad anatomy, disfigured",
-          num_inference_steps: 30,
-          guidance_scale: 5,
-          ip_adapter_scale: 0.95,
-          controlnet_conditioning_scale: 0.95,
-          enhance_nonface_region: true,
-          output_format: "png",
-          output_quality: 90,
+          negative_prompt: negativePrompt,
+          style_name: styleName,
+          num_steps: 30,
+          guidance_scale: 6,
+          style_strength_ratio: 35,
+          num_outputs: 1,
           disable_safety_checker: true,
         }
       })
@@ -65,7 +65,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // prediction ID만 반환 → 클라이언트가 /api/status로 폴링
     return new Response(JSON.stringify({ predictionId: prediction.id }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },

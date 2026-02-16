@@ -1,6 +1,106 @@
 import { useState, type ChangeEvent } from 'react';
 import './App.css';
 
+// ===== 배경 풀: 각 스타일별 3~5개 랜덤 배경 =====
+const BACKGROUNDS: Record<string, string[]> = {
+  male_uniform: [
+    "old Korean school corridor with grey concrete walls and wooden doors",
+    "narrow Korean alley with low brick walls and slate rooftops in 1970s",
+    "retro Korean photo studio with grey canvas backdrop and wooden stool",
+    "old Korean classroom with wooden desks and green chalkboard",
+    "school gate with concrete pillars and iron fence",
+  ],
+  female_uniform: [
+    "old Korean school campus with cherry blossom trees",
+    "retro Korean street with old signboards and concrete buildings",
+    "Korean photo studio with painted flower backdrop, 1970s style",
+    "school garden with wooden bench and brick flower bed",
+    "old Korean classroom window with sunlight streaming in",
+  ],
+  military_training: [
+    "dusty school dirt playground with goalposts",
+    "open field drill ground with Korean school building behind",
+    "school yard with Korean flag pole and assembly area",
+    "rural Korean road with rice paddies in the distance",
+    "military training field with low hills and autumn trees",
+  ],
+  graduation: [
+    "retro Korean photo studio with plain grey backdrop",
+    "school auditorium with wooden podium and Korean flag",
+    "school entrance with stone school name sign",
+    "cherry blossom lined school road",
+  ],
+  picnic: [
+    "Korean countryside with rice paddies and mountains",
+    "old Korean amusement park with retro rides",
+    "riverside picnic area with stone bridge",
+    "mountain hiking trail with wooden railing",
+    "seaside with old fishing boats and rocky shore",
+  ],
+  gym_class: [
+    "school dirt playground with white line markings",
+    "outdoor basketball court with old backboard",
+    "school field day with colored tents and flags",
+    "running track with dusty ground",
+  ],
+  classroom: [
+    "old Korean classroom with wooden desks and green chalkboard, chalk writings on board",
+    "classroom with open windows, curtains blowing, afternoon sunlight",
+    "study hall with fluorescent lights and rows of desks with books",
+    "classroom corner with potted plant and class schedule on wall",
+  ],
+  group_photo: [
+    "school playground with students lined up in rows",
+    "school front gate with the school name carved in stone",
+    "classroom in front of chalkboard with date written",
+    "school rooftop with cityscape and water tank behind",
+  ],
+};
+
+// ===== 스타일 정의 =====
+const STYLE_CONFIGS: Record<string, { prompt: string; photomakerStyle: string }> = {
+  male_uniform: {
+    prompt: "a 17 year old asian boy img wearing 1970s Korean black school uniform, black stand-up collar tunic with brass buttons, mandarin collar, white shirt underneath, white name tag on chest, slim teenage build, short buzz cut hair",
+    photomakerStyle: "Photographic (Default)",
+  },
+  female_uniform: {
+    prompt: "a 17 year old asian girl img wearing 1970s Korean girl school uniform, white round-collar blouse with black jumper skirt below the knee, slim teenage build, hair in two braids or short bob with hair pin",
+    photomakerStyle: "Photographic (Default)",
+  },
+  military_training: {
+    prompt: "a 17 year old asian student img wearing 1970s Korean military training uniform Kyoryunbok, olive khaki uniform jacket and trousers, olive military cap on head, slim teenage build, standing at attention",
+    photomakerStyle: "Photographic (Default)",
+  },
+  graduation: {
+    prompt: "a 17 year old asian student img in 1970s Korean graduation photo, wearing black school uniform, serious formal pose facing camera, slim teenage build, studio portrait with flash photography",
+    photomakerStyle: "Photographic (Default)",
+  },
+  picnic: {
+    prompt: "a 17 year old asian student img on school picnic trip in 1980s Korea, wearing casual clothes over school uniform, carrying a canteen and backpack, slim teenage build, candid outdoor photo",
+    photomakerStyle: "Photographic (Default)",
+  },
+  gym_class: {
+    prompt: "a 17 year old asian student img in 1970s Korean gym class, wearing white t-shirt and navy blue short shorts, slim teenage athletic build, doing exercise or running",
+    photomakerStyle: "Photographic (Default)",
+  },
+  classroom: {
+    prompt: "a 17 year old asian student img sitting at a wooden desk in 1970s Korean classroom, wearing black school uniform, studying with textbooks, slim teenage build, candid school life photo",
+    photomakerStyle: "Photographic (Default)",
+  },
+  group_photo: {
+    prompt: "a 17 year old asian student img posing for class group photo in 1970s Korea, wearing black school uniform, arms crossed or hands behind back, slim teenage build, formal school photo",
+    photomakerStyle: "Photographic (Default)",
+  },
+};
+
+const NEGATIVE_PROMPT = "western blazer, british school uniform, hogwarts, modern clothes, different face, ugly, deformed, blurry, low quality, anime, cartoon, 3d render, digital look, plastic surgery face, mature adult body, overweight, muscular, wrinkles, aged skin";
+
+const MASTER_SUFFIX = "analog film photograph, Kodak Gold 200, natural film grain, vintage warm tone, 1970s 1980s South Korea, photorealistic";
+
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -40,50 +140,23 @@ function App() {
     try {
       const base64Image = await toBase64(selectedFile);
 
-      const MASTER_PROMPT =
-        "analog film photograph, shot on Kodak Gold 200, " +
-        "natural film grain, vintage color grading, soft warm tone, " +
-        "1970s 1980s South Korea, " +
-        "preserve original face exactly, same face, identical face, do not change face";
-
-      let specificPrompt = "";
-      if (styleOption === 'male_uniform') {
-        specificPrompt =
-          "a male student wearing black Korean Hankbok school uniform, " +
-          "black stand-up collar tunic with 5 brass metal buttons in a row, " +
-          "stiff mandarin collar buttoned to the top, white dress shirt visible at collar, " +
-          "white rectangular plastic name tag on left chest, " +
-          "short buzz cut hair or crew cut, " +
-          "background: old Korean school corridor with grey concrete walls and wooden doors, " +
-          "or old narrow Korean alley with low brick walls and slate rooftops, " +
-          "studio portrait with flash";
-      } else if (styleOption === 'female_uniform') {
-        specificPrompt =
-          "a female student wearing 1970s Korean girl school uniform, " +
-          "white round-collar blouse with black jumper skirt below the knee, " +
-          "or white blouse with dark navy vest and black pleated skirt, " +
-          "white socks and black flat shoes, hair in two braids or short bob with hair pin, " +
-          "background: old Korean school campus with cherry blossom trees, " +
-          "or retro Korean street with old signboards and concrete buildings, " +
-          "studio portrait with flash";
-      } else if (styleOption === 'military_training') {
-        specificPrompt =
-          "a student wearing 1970s 1980s Korean military training uniform Kyoryunbok, " +
-          "olive khaki green uniform jacket and trousers, " +
-          "matching olive green military cap on head, black military boots, " +
-          "standing at attention, " +
-          "background: dusty school dirt playground with goalposts, " +
-          "or open field drill ground with Korean school building behind, " +
-          "outdoor harsh sunlight";
-      }
-
-      const promptText = `${specificPrompt}, ${MASTER_PROMPT}, masterpiece, best quality, photorealistic`;
+      // 스타일 설정 가져오기
+      const config = STYLE_CONFIGS[styleOption];
+      // 랜덤 배경 선택
+      const bg = pickRandom(BACKGROUNDS[styleOption]);
+      // 최종 프롬프트 조합: 스타일 + 배경 + 마스터
+      const promptText = `${config.prompt}, background: ${bg}, ${MASTER_SUFFIX}`;
 
       setLoadingMsg('사진관 아저씨가 필름을 꺼내고 있습니다...');
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Image, promptText }),
+        body: JSON.stringify({
+          base64Image,
+          promptText,
+          negativePrompt: NEGATIVE_PROMPT,
+          styleName: config.photomakerStyle,
+        }),
       });
 
       if (!response.ok) {
@@ -231,9 +304,14 @@ function App() {
                 onChange={(e) => setStyleOption(e.target.value)}
                 className="style-select"
               >
-                <option value="male_uniform">남학생 교복 (친구/말죽거리)</option>
-                <option value="female_uniform">여학생 교복 (클래식)</option>
-                <option value="military_training">교련복 (말죽거리)</option>
+                <option value="male_uniform">남학생 교복 (검정 학란)</option>
+                <option value="female_uniform">여학생 교복 (점퍼스커트)</option>
+                <option value="military_training">교련복 (카키색)</option>
+                <option value="graduation">졸업사진 (증명 스타일)</option>
+                <option value="picnic">소풍 사진 (야외)</option>
+                <option value="gym_class">체육 시간 (운동장)</option>
+                <option value="classroom">교실 사진 (수업 중)</option>
+                <option value="group_photo">단체 사진 (반 사진)</option>
               </select>
 
               <button
