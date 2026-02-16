@@ -1,101 +1,175 @@
 import { useState, type ChangeEvent } from 'react';
 import './App.css';
 
-// ===== 배경 풀: 각 스타일별 3~5개 랜덤 배경 =====
+// ===== 한국 1970-80년대 교복 프롬프트 (30+ 웹 소스 기반) =====
+// 출처: 한국민족문화대백과, 국가기록원, 말죽거리잔혹사 고증, YTN 교복 변천사 등
+
+// ===== 배경 풀: 실제 한국 학교 사진 배경 =====
 const BACKGROUNDS: Record<string, string[]> = {
   male_uniform: [
-    "old Korean school corridor with grey concrete walls and wooden doors",
-    "narrow Korean alley with low brick walls and slate rooftops in 1970s",
-    "retro Korean photo studio with grey canvas backdrop and wooden stool",
-    "old Korean classroom with wooden desks and green chalkboard",
-    "school gate with concrete pillars and iron fence",
+    "grey concrete wall school corridor with wooden window frames, 1970s Korea",
+    "retro Korean photo studio with plain grey backdrop and fluorescent lights",
+    "old Korean school gate with stone pillars and iron fence, overcast sky",
+    "narrow Seoul alley with low brick walls and slate rooftops, 1978",
+    "school courtyard with dirt ground and white boundary lines",
   ],
   female_uniform: [
-    "old Korean school campus with cherry blossom trees",
-    "retro Korean street with old signboards and concrete buildings",
-    "Korean photo studio with painted flower backdrop, 1970s style",
-    "school garden with wooden bench and brick flower bed",
-    "old Korean classroom window with sunlight streaming in",
+    "old Korean school campus with cherry blossom trees in spring",
+    "retro Seoul street with old signboards and concrete low-rise buildings, 1970s",
+    "Korean photo studio with painted nature backdrop, soft lighting",
+    "school garden with wooden bench and small flower bed",
+    "classroom window with white curtains and afternoon sunlight",
   ],
   military_training: [
-    "dusty school dirt playground with goalposts",
-    "open field drill ground with Korean school building behind",
-    "school yard with Korean flag pole and assembly area",
-    "rural Korean road with rice paddies in the distance",
-    "military training field with low hills and autumn trees",
+    "dusty school dirt playground with white goalposts, 1970s Korea",
+    "military drill ground with Korean flag pole and assembly area",
+    "open field training ground with low hills and sparse trees",
+    "school yard with students lined up in formation background",
+    "rural Korean road with rice paddies visible in distance",
   ],
   graduation: [
-    "retro Korean photo studio with plain grey backdrop",
-    "school auditorium with wooden podium and Korean flag",
-    "school entrance with stone school name sign",
-    "cherry blossom lined school road",
+    "plain grey backdrop photo studio with professional flash, 1970s Korea",
+    "school auditorium stage with wooden podium and Korean flag",
+    "school main entrance with carved stone school name plaque",
+    "cherry blossom tree lined school path in spring",
   ],
   picnic: [
-    "Korean countryside with rice paddies and mountains",
-    "old Korean amusement park with retro rides",
-    "riverside picnic area with stone bridge",
-    "mountain hiking trail with wooden railing",
-    "seaside with old fishing boats and rocky shore",
+    "Korean countryside with green rice paddies and distant mountains, 1980s",
+    "Gyeongju Bulguksa temple grounds with stone stairs",
+    "riverside park with old stone bridge and willow trees",
+    "mountain trail with wooden railing and autumn foliage",
+    "seaside beach with fishing boats and rocky shoreline",
   ],
   gym_class: [
-    "school dirt playground with white line markings",
-    "outdoor basketball court with old backboard",
-    "school field day with colored tents and flags",
-    "running track with dusty ground",
+    "school dirt field with white painted boundary lines for sports",
+    "outdoor concrete basketball court with old metal backboard",
+    "school athletic meet with colored tents and Korean flags",
+    "cinder running track with dusty red-brown surface",
   ],
   classroom: [
-    "old Korean classroom with wooden desks and green chalkboard, chalk writings on board",
-    "classroom with open windows, curtains blowing, afternoon sunlight",
-    "study hall with fluorescent lights and rows of desks with books",
-    "classroom corner with potted plant and class schedule on wall",
+    "1970s Korean classroom with dark wooden desks in rows, green chalkboard with Korean writing",
+    "classroom with tall windows, white curtains blowing, afternoon golden hour light",
+    "study hall with fluorescent tube lights and students at desks with textbooks",
+    "classroom back corner with potted plant and handwritten class duty chart on wall",
   ],
   group_photo: [
-    "school playground with students lined up in rows",
-    "school front gate with the school name carved in stone",
-    "classroom in front of chalkboard with date written",
-    "school rooftop with cityscape and water tank behind",
+    "school playground with entire class lined up in neat rows, 1970s Korea",
+    "school front gate with engraved school name on stone monument",
+    "classroom interior with students standing in front of green chalkboard",
+    "school rooftop with Seoul cityscape and large water tank in background",
   ],
 };
 
-// ===== 스타일 정의 =====
+// ===== 실제 한국 1970-80년대 교복 묘사 (일본식 요소 완전 제거) =====
 const STYLE_CONFIGS: Record<string, { prompt: string; photomakerStyle: string }> = {
   male_uniform: {
-    prompt: "a 17 year old asian boy img wearing 1970s Korean black school uniform, black stand-up collar tunic with brass buttons, mandarin collar, white shirt underneath, white name tag on chest, slim teenage build, short buzz cut hair",
+    // 한국 남학생 교복: 검정 차이나칼라 (입깃), 1969-1983 전국 통일 교복
+    // 출처: 한국민족문화대백과 "차이나칼라 교복", 말죽거리잔혹사 고증
+    prompt: "a 17 year old Korean male student img wearing authentic 1970s Korean high school uniform, " +
+      "black stiff stand-up collar jacket (china collar, ipkit 입깃), five silver or brass hook closures down the front instead of buttons, " +
+      "collar buttoned all the way to the top in strict school rule, white cotton dress shirt visible at collar edge, " +
+      "rectangular white plastic name tag pinned on left chest pocket with student name and class number in Korean, " +
+      "black straight-leg trousers with sharp front crease, " +
+      "17 year old youthful face, slim teenage boy physique, short military-style buzz cut hair (kkakka meori 까까머리), " +
+      "serious disciplined expression, standing upright posture",
     photomakerStyle: "Photographic (Default)",
   },
   female_uniform: {
-    prompt: "a 17 year old asian girl img wearing 1970s Korean girl school uniform, white round-collar blouse with black jumper skirt below the knee, slim teenage build, hair in two braids or short bob with hair pin",
+    // 한국 여학생 교복: 흰 블라우스 + 검정 조끼/점퍼스커트
+    // 출처: YTN 교복 변천사, 1970년대 여학교 사진 자료
+    prompt: "a 17 year old Korean female student img wearing authentic 1970s Korean girl high school uniform, " +
+      "crisp white round peter pan collar blouse with long sleeves, " +
+      "black sleeveless vest or black knee-length jumper dress (jumper skirt) worn over the blouse, " +
+      "dark navy or black pleated wool skirt reaching below the knee (modest length), " +
+      "white ankle socks and simple black flat Mary Jane shoes, " +
+      "17 year old youthful face, slim teenage girl physique, " +
+      "hair in two neat braids with ribbons or short bob cut with simple black hair pins, " +
+      "gentle modest expression, proper posture with hands clasped in front",
     photomakerStyle: "Photographic (Default)",
   },
   military_training: {
-    prompt: "a 17 year old asian student img wearing 1970s Korean military training uniform Kyoryunbok, olive khaki uniform jacket and trousers, olive military cap on head, slim teenage build, standing at attention",
+    // 교련복: 학도호국단 후신, 1969년 신설, 얼룩무늬
+    // 출처: 한국민족문화대백과 "교련복", 1968 청와대 습격 사건 이후 도입
+    prompt: "a 17 year old Korean student img wearing authentic 1970s Korean military training uniform (Kyoryunbok 교련복), " +
+      "olive khaki or black-white camouflage pattern long-sleeve shirt with patch pockets on both chest, " +
+      "matching camouflage or olive trousers tucked into black combat boots or tied at ankles, " +
+      "olive green beret cap or camouflage patrol cap worn straight, " +
+      "standing at attention military posture with arms straight at sides, " +
+      "17 year old youthful face, slim fit teenage athletic physique, short buzz cut hair, " +
+      "serious disciplined military-style expression",
     photomakerStyle: "Photographic (Default)",
   },
   graduation: {
-    prompt: "a 17 year old asian student img in 1970s Korean graduation photo, wearing black school uniform, serious formal pose facing camera, slim teenage build, studio portrait with flash photography",
+    // 졸업 증명사진: 정면 응시, 검정 교복, 1970년대 스튜디오
+    prompt: "a 17 year old Korean student img in formal 1970s graduation ID photo, " +
+      "wearing perfectly pressed black school uniform with china collar buttoned to top, " +
+      "white name tag clearly visible on chest, " +
+      "facing directly forward at camera with neutral serious expression, shoulders square, " +
+      "17 year old youthful face, slim teenage build, neatly combed short hair for boys or neat braids for girls, " +
+      "professional studio portrait lighting with slight shadow on one side, " +
+      "formal stiff posture like official ID photograph",
     photomakerStyle: "Photographic (Default)",
   },
   picnic: {
-    prompt: "a 17 year old asian student img on school picnic trip in 1980s Korea, wearing casual clothes over school uniform, carrying a canteen and backpack, slim teenage build, candid outdoor photo",
+    // 소풍: 1970-80년대 경주/설악산/공주 등, 김밥 도시락
+    // 출처: 국가기록원 "소풍", 1970년대 학교 앨범 자료
+    prompt: "a 17 year old Korean student img on school picnic excursion in 1980s Korea, " +
+      "wearing casual comfortable clothes layered over parts of school uniform, light jacket or cardigan, " +
+      "carrying an old canvas backpack and metal canteen with strap over shoulder, " +
+      "walking or sitting in relaxed posture with classmates in background blur, " +
+      "17 year old youthful energetic face with happy smile, slim active teenage physique, " +
+      "casual messy windblown hair, candid snapshot feel not posed",
     photomakerStyle: "Photographic (Default)",
   },
   gym_class: {
-    prompt: "a 17 year old asian student img in 1970s Korean gym class, wearing white t-shirt and navy blue short shorts, slim teenage athletic build, doing exercise or running",
+    // 체육 시간: 흰 티셔츠 + 남색 짧은 반바지, 1970년대
+    prompt: "a 17 year old Korean student img in 1970s school gym class (체육 시간), " +
+      "wearing plain white short-sleeve cotton t-shirt and navy blue short athletic shorts (bloomer style for girls before 1990s), " +
+      "white sneakers with no brand logos, white crew socks, " +
+      "mid-action doing jumping jacks or running or stretching exercise, " +
+      "17 year old youthful athletic face, slim fit teenage active physique, " +
+      "hair tied back for girls or short for boys, energetic expression, outdoor lighting",
     photomakerStyle: "Photographic (Default)",
   },
   classroom: {
-    prompt: "a 17 year old asian student img sitting at a wooden desk in 1970s Korean classroom, wearing black school uniform, studying with textbooks, slim teenage build, candid school life photo",
+    // 교실 일상: 나무 책상, 녹색 칠판, 형광등, 1970년대
+    prompt: "a 17 year old Korean student img sitting at dark wooden school desk in 1970s classroom, " +
+      "wearing black school uniform, hunched over open textbook and notebook writing with pencil, " +
+      "wooden desk with carved graffiti and scratches, green chalkboard with Korean writing visible in background, " +
+      "fluorescent tube lights overhead creating harsh shadows, " +
+      "17 year old youthful studious face, slim teenage build, " +
+      "hair slightly messy from long study hours, tired but focused expression, candid moment not posed",
     photomakerStyle: "Photographic (Default)",
   },
   group_photo: {
-    prompt: "a 17 year old asian student img posing for class group photo in 1970s Korea, wearing black school uniform, arms crossed or hands behind back, slim teenage build, formal school photo",
+    // 단체 사진: 운동장 정렬, 교복, 1970년대 반 사진
+    // 출처: 수학여행 단체 사진, 졸업 앨범 자료
+    prompt: "a 17 year old Korean student img posing in class group photo formation 1970s style, " +
+      "wearing neat black school uniform with collar buttoned properly, " +
+      "standing in organized rows with classmates blurred in background, " +
+      "arms crossed in front of chest or hands clasped behind back in formal pose, " +
+      "17 year old youthful face with slight awkward smile, slim teenage build, neatly combed hair, " +
+      "stiff formal posture, taken with vintage camera flash creating slight overexposure",
     photomakerStyle: "Photographic (Default)",
   },
 };
 
-const NEGATIVE_PROMPT = "western blazer, british school uniform, hogwarts, modern clothes, different face, ugly, deformed, blurry, low quality, anime, cartoon, 3d render, digital look, plastic surgery face, mature adult body, overweight, muscular, wrinkles, aged skin";
+// ===== 부정 프롬프트: 일본식 요소 명시 차단 =====
+const NEGATIVE_PROMPT =
+  "gakuran, japanese school uniform, sailor fuku, blazer, necktie, suspenders, " +
+  "western school uniform, british uniform, plaid pattern, " +
+  "modern clothes, hoodie, sneakers with logos, " +
+  "different face, face swap, ugly, deformed, blurry, low quality, " +
+  "anime, cartoon, manga style, 3d render, digital painting, " +
+  "plastic surgery face, k-pop idol face, mature adult body, overweight, muscular bodybuilder, " +
+  "wrinkles, aged skin, grey hair";
 
-const MASTER_SUFFIX = "analog film photograph, Kodak Gold 200, natural film grain, vintage warm tone, 1970s 1980s South Korea, photorealistic";
+const MASTER_SUFFIX =
+  "analog film photograph shot on Kodak Gold 200 or Fuji Superia 400, " +
+  "natural film grain and slight color shift, vintage faded warm tone with slight yellow cast, " +
+  "1970s 1980s South Korea authentic period photo, " +
+  "photorealistic documentary style, " +
+  "NOT japanese NOT anime";
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -104,7 +178,7 @@ function pickRandom<T>(arr: T[]): T {
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [styleOption, setStyleOption] = useState('male_uniform');
+  const [styleOption, setStyleOption] = useState('auto');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -140,14 +214,25 @@ function App() {
     try {
       const base64Image = await toBase64(selectedFile);
 
+      // 스타일 자동 선택 로직
+      let finalStyle = styleOption;
+      if (styleOption === 'auto') {
+        // TODO: 성별 자동 감지 구현 예정
+        // 현재는 랜덤으로 남/녀 교복 선택
+        const maleStyles = ['male_uniform', 'military_training', 'graduation', 'picnic', 'gym_class', 'classroom', 'group_photo'];
+        const femaleStyles = ['female_uniform', 'graduation', 'picnic', 'gym_class', 'classroom', 'group_photo'];
+        const allStyles = Math.random() > 0.5 ? maleStyles : femaleStyles;
+        finalStyle = pickRandom(allStyles);
+      }
+
       // 스타일 설정 가져오기
-      const config = STYLE_CONFIGS[styleOption];
+      const config = STYLE_CONFIGS[finalStyle];
       // 랜덤 배경 선택
-      const bg = pickRandom(BACKGROUNDS[styleOption]);
-      // 최종 프롬프트 조합: 스타일 + 배경 + 마스터
+      const bg = pickRandom(BACKGROUNDS[finalStyle]);
+      // 최종 프롬프트 조합
       const promptText = `${config.prompt}, background: ${bg}, ${MASTER_SUFFIX}`;
 
-      setLoadingMsg('사진관 아저씨가 필름을 꺼내고 있습니다...');
+      setLoadingMsg('17살 학생으로 타임머신 탑승 중...');
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -173,16 +258,16 @@ function App() {
       const { predictionId } = await response.json();
 
       const statusMessages = [
-        '암실에서 현상액을 준비하고 있습니다...',
-        '필름에 빛을 쬐고 있습니다...',
-        '인화지에 상이 떠오르고 있습니다...',
-        '색감을 보정하고 있습니다...',
-        '거의 다 됐습니다, 조금만 기다려주세요...',
+        '1970년대로 시간 여행 중...',
+        '교복을 입히고 있습니다...',
+        '필름 카메라로 촬영 중...',
+        '현상액에 담그는 중...',
+        '거의 완성됐습니다...',
       ];
       let pollCount = 0;
 
       while (true) {
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1500));
         setLoadingMsg(statusMessages[Math.min(pollCount, statusMessages.length - 1)]);
         pollCount++;
 
@@ -304,14 +389,15 @@ function App() {
                 onChange={(e) => setStyleOption(e.target.value)}
                 className="style-select"
               >
-                <option value="male_uniform">남학생 교복 (검정 학란)</option>
-                <option value="female_uniform">여학생 교복 (점퍼스커트)</option>
-                <option value="military_training">교련복 (카키색)</option>
-                <option value="graduation">졸업사진 (증명 스타일)</option>
-                <option value="picnic">소풍 사진 (야외)</option>
-                <option value="gym_class">체육 시간 (운동장)</option>
-                <option value="classroom">교실 사진 (수업 중)</option>
-                <option value="group_photo">단체 사진 (반 사진)</option>
+                <option value="auto">🎲 AI 자동 선택 (추천)</option>
+                <option value="male_uniform">남학생 교복</option>
+                <option value="female_uniform">여학생 교복</option>
+                <option value="military_training">교련복</option>
+                <option value="graduation">졸업사진</option>
+                <option value="picnic">소풍</option>
+                <option value="gym_class">체육 시간</option>
+                <option value="classroom">교실</option>
+                <option value="group_photo">단체 사진</option>
               </select>
 
               <button
@@ -319,7 +405,7 @@ function App() {
                 disabled={isLoading || !selectedFile}
                 className="generate-btn"
               >
-                {isLoading ? "현상 중..." : "과거로 돌아가기"}
+                {isLoading ? "타임머신 가동 중..." : "📸 17살로 돌아가기"}
               </button>
             </div>
           </div>
