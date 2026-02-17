@@ -38,9 +38,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           prompt: promptText,
           negative_prompt: negativePrompt,
           style_name: styleName,
-          num_steps: 50,
-          guidance_scale: 5,
-          style_strength_ratio: 20,
+          num_steps: 80,              // 50 → 80: 고품질 생성 (약 10초 추가)
+          guidance_scale: 7.5,        // 5 → 7.5: 프롬프트 충실도 향상
+          style_strength_ratio: 30,   // 20 → 30: 스타일 강도 증가
           num_outputs: 1,
           disable_safety_checker: true,
         }

@@ -147,21 +147,22 @@ const STYLE_CONFIGS: Record<string, { prompt: string; photomakerStyle: string }>
 
 // ===== 부정 프롬프트: 일본식 요소 명시 차단 + 얼굴 변경 강력 차단 =====
 const NEGATIVE_PROMPT =
-  "different face, changed face, different person, face swap, face morph, face replacement, " +
+  "different face, changed face, different person, face swap, face morph, face replacement, altered facial features, " +
   "gakuran, japanese school uniform, sailor fuku, blazer, necktie, suspenders, " +
   "western school uniform, british uniform, plaid pattern, " +
   "modern clothes, hoodie, sneakers with logos, " +
-  "ugly, deformed, blurry, low quality, " +
-  "anime, cartoon, manga style, 3d render, digital painting, " +
-  "plastic surgery face, k-pop idol face, " +
+  "ugly, deformed, blurry, low quality, worst quality, bad quality, jpeg artifacts, " +
+  "overexposed, underexposed, oversaturated, " +
+  "anime, cartoon, manga style, 3d render, digital painting, illustration, " +
+  "plastic surgery face, k-pop idol face, celebrity face, model face, " +
   "nsfw, nudity";
 
 const MASTER_SUFFIX =
-  "preserve original face and facial features exactly as input, " +
-  "analog film photograph on Kodak Gold 200, " +
-  "film grain, vintage warm tone, " +
-  "1970s 1980s South Korea period photo, " +
-  "photorealistic style";
+  "IMPORTANT: preserve exact original face, maintain all facial features identical to input photo, " +
+  "high quality, sharp focus, detailed, professional photography, " +
+  "analog film photograph on Kodak Gold 200, natural film grain, " +
+  "vintage warm tone, authentic 1970s-1980s South Korea period photo, " +
+  "photorealistic style, 8k uhd, masterpiece";
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
