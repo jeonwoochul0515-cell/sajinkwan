@@ -67,81 +67,89 @@ const BACKGROUNDS: Record<string, string[]> = {
   ],
 };
 
-// ===== 실제 한국 1970-80년대 교복 묘사 (일본식 요소 완전 제거) =====
+// ===== Flux.1 최적화 프롬프트 (영어 자연어 스타일) =====
 const STYLE_CONFIGS: Record<string, { prompt: string; photomakerStyle: string }> = {
   male_uniform: {
-    // 한국 남학생 교복: 검정 차이나칼라 (입깃), 1969-1983 전국 통일 교복
-    // 출처: 한국민족문화대백과 "차이나칼라 교복", 말죽거리잔혹사 고증
-    prompt: "a photo of img, Korean male high school student wearing authentic 1970s uniform, " +
-      "black stand-up collar jacket (china collar ipkit 입깃) with five metal hook closures, " +
-      "collar buttoned to top, white dress shirt visible at collar, " +
-      "white plastic name tag on left chest pocket, " +
-      "black straight trousers, short hair, standing posture",
-    photomakerStyle: "Photographic (Default)",
+    // Flux는 대화형 영어 프롬프트를 선호
+    // "a photo of" 대신 자연스러운 설명
+    prompt: "A cinematic photo of a Korean male high school student in authentic 1970s uniform. " +
+      "He is wearing a black stand-up collar jacket (Mandarin collar, ipkit style) with metal hook closures fastened to the top, " +
+      "white dress shirt visible at the collar, white plastic name tag on left chest pocket. " +
+      "Black straight-leg trousers, short neat hair. Standing in a natural pose. " +
+      "Shot on vintage 35mm film, Kodak Gold 200, film grain, warm tones, shallow depth of field. " +
+      "1970s Korean school atmosphere, photorealistic, highly detailed, masterpiece quality",
+    photomakerStyle: "Cinematic",
   },
   female_uniform: {
-    // 한국 여학생 교복: 흰 블라우스 + 검정 조끼/점퍼스커트
-    // 출처: YTN 교복 변천사, 1970년대 여학교 사진 자료
-    prompt: "a photo of img, Korean female high school student wearing authentic 1970s uniform, " +
-      "white peter pan collar blouse with long sleeves, " +
-      "black sleeveless vest or black jumper skirt over blouse, " +
-      "dark pleated skirt below knee, " +
-      "white socks and black Mary Jane shoes, " +
-      "neat hairstyle, proper posture with hands clasped",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "A cinematic photo of a Korean female high school student in authentic 1970s school uniform. " +
+      "She is wearing a white peter pan collar blouse with long sleeves, " +
+      "black sleeveless vest or black jumper dress worn over the blouse, " +
+      "dark pleated skirt reaching below the knees. White ankle socks and black Mary Jane shoes. " +
+      "Neat hairstyle with hair tied back, proper standing posture with hands clasped in front. " +
+      "Shot on vintage 35mm film, Kodak Gold 200, soft natural lighting, film grain, warm nostalgic tones. " +
+      "1970s Korean school setting, photorealistic, highly detailed, elegant composition, masterpiece",
+    photomakerStyle: "Cinematic",
   },
   military_training: {
-    // 교련복: 학도호국단 후신, 1969년 신설, 얼룩무늬
-    // 출처: 한국민족문화대백과 "교련복", 1968 청와대 습격 사건 이후 도입
-    prompt: "a photo of img wearing 1970s Korean military training uniform (Kyoryunbok 교련복), " +
-      "olive or camouflage long-sleeve shirt with chest pockets, " +
-      "matching trousers tucked into black combat boots, " +
-      "olive beret or patrol cap, " +
-      "standing at attention posture",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "A photorealistic portrait of a Korean student in 1970s military training uniform (Kyoryunbok). " +
+      "Wearing olive green or camouflage pattern long-sleeve shirt with chest pockets and epaulettes, " +
+      "matching military-style trousers neatly tucked into polished black combat boots. " +
+      "Olive green beret or patrol cap worn at regulation angle. Standing at formal military attention. " +
+      "Shot on vintage film camera, gritty texture, dramatic lighting, film grain. " +
+      "1970s Korean school military drill atmosphere, serious expression, photorealistic detail, masterpiece",
+    photomakerStyle: "Cinematic",
   },
   graduation: {
-    // 졸업 증명사진: 정면 응시, 검정 교복, 1970년대 스튜디오
-    prompt: "a formal 1970s Korean graduation photo of img, " +
-      "wearing black school uniform with china collar buttoned to top, " +
-      "white name tag on chest, " +
-      "facing forward, shoulders square, neat hair, " +
-      "professional studio portrait lighting, formal ID photograph style",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "A formal 1970s Korean high school graduation portrait photograph. " +
+      "Subject wearing pristine black school uniform with Mandarin collar buttoned all the way to the top, " +
+      "white plastic name tag clearly visible on the left chest. " +
+      "Facing directly forward with shoulders squared, perfect posture, neat hair meticulously groomed. " +
+      "Professional studio portrait lighting with soft key light and fill, clean grey backdrop. " +
+      "Sharp focus on face, formal ID photograph style, vintage photo studio quality. " +
+      "Shot on medium format film camera, classic portrait composition, highly detailed, photorealistic",
+    photomakerStyle: "Cinematic",
   },
   picnic: {
-    // 소풍: 1970-80년대 경주/설악산/공주 등, 김밥 도시락
-    // 출처: 국가기록원 "소풍", 1970년대 학교 앨범 자료
-    prompt: "a photo of img on 1980s Korean school picnic, " +
-      "wearing casual jacket or cardigan over uniform parts, " +
-      "carrying old canvas backpack and metal canteen, " +
-      "relaxed posture, candid snapshot feel",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "A candid photo from a 1980s Korean school picnic excursion. " +
+      "Subject wearing a casual jacket or cardigan layered over school uniform pieces, " +
+      "carrying a weathered canvas backpack and vintage metal canteen strapped across the shoulder. " +
+      "Relaxed, natural posture in outdoor setting. " +
+      "Beautiful Korean countryside or historical site in background - mountains, temples, or rice paddies. " +
+      "Shot on consumer film camera, Kodak Gold, natural sunlight, candid snapshot aesthetic, " +
+      "slight motion blur, authentic 1980s nostalgia, warm film tones, photorealistic",
+    photomakerStyle: "Cinematic",
   },
   gym_class: {
-    // 체육 시간: 흰 티셔츠 + 남색 짧은 반바지, 1970년대
-    prompt: "a photo of img in 1970s Korean school gym class, " +
-      "wearing white short-sleeve t-shirt and navy blue athletic shorts, " +
-      "white sneakers and white socks, " +
-      "mid-action exercise pose, outdoor lighting",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "An action photo from 1970s Korean school physical education class. " +
+      "Subject wearing classic white short-sleeve cotton t-shirt and navy blue athletic shorts, " +
+      "white canvas sneakers with white crew socks. " +
+      "Captured mid-exercise in dynamic athletic pose showing movement and energy. " +
+      "Outdoor school sports field with dirt ground, white painted boundary lines visible. " +
+      "Natural daylight, high shutter speed freeze-frame, film grain, " +
+      "vintage sports photography style, 1970s Korea, photorealistic detail",
+    photomakerStyle: "Cinematic",
   },
   classroom: {
-    // 교실 일상: 나무 책상, 녹색 칠판, 형광등, 1970년대
-    prompt: "a photo of img sitting at wooden desk in 1970s Korean classroom, " +
-      "wearing black school uniform, writing in notebook, " +
-      "green chalkboard visible in background, " +
-      "fluorescent overhead lighting, candid moment",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "An intimate candid photo inside a 1970s Korean classroom. " +
+      "Subject sitting at a dark wooden school desk, wearing black school uniform, " +
+      "absorbed in writing in a notebook with focused concentration. " +
+      "Green chalkboard visible in the soft-focus background with Korean writing, " +
+      "fluorescent tube lights creating overhead ambient lighting. " +
+      "Dust particles visible in afternoon window light. " +
+      "Shot on 35mm film, natural indoor lighting, documentary photography style, " +
+      "authentic 1970s classroom atmosphere, photorealistic, detailed textures",
+    photomakerStyle: "Cinematic",
   },
   group_photo: {
-    // 단체 사진: 운동장 정렬, 교복, 1970년대 반 사진
-    // 출처: 수학여행 단체 사진, 졸업 앨범 자료
-    prompt: "a photo of img in 1970s Korean class group photo, " +
-      "wearing black school uniform with collar buttoned, " +
-      "standing in rows with classmates in background, " +
-      "formal pose, vintage camera flash lighting",
-    photomakerStyle: "Photographic (Default)",
+    prompt: "A formal 1970s Korean class group photograph. " +
+      "Subject standing in organized rows alongside classmates, all wearing black school uniforms " +
+      "with collars properly buttoned. Formal standing pose with proper posture. " +
+      "School playground or building facade in background. " +
+      "Shot with vintage camera flash creating classic group photo lighting with subtle shadows. " +
+      "Multiple students visible but subject clearly distinguished. " +
+      "Classic yearbook photography style, vintage film quality, 1970s Korea, " +
+      "sharp focus on faces, photorealistic group portrait",
+    photomakerStyle: "Cinematic",
   },
 };
 
