@@ -5,6 +5,7 @@
 // 환경 변수 타입
 export interface Env {
   REPLICATE_API_TOKEN: string;
+  POLAR_ACCESS_TOKEN: string;
 }
 
 // API 요청 타입
