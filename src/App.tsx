@@ -354,7 +354,7 @@ function App() {
         throw new Error(errorMessage);
       }
 
-      const { predictionId } = await response.json();
+      const { data: { predictionId } } = await response.json();
 
       // 폴링으로 결과 대기 (최대 5분)
       const statusMessages = [
@@ -378,12 +378,13 @@ function App() {
         });
 
         const statusData = await statusRes.json();
+        const statusPayload = statusData.data;
 
-        if (statusData.status === 'succeeded') {
-          setAnimationUrl(statusData.resultUrl);
+        if (statusPayload?.status === 'succeeded') {
+          setAnimationUrl(statusPayload.resultUrl);
           setLoadingMsg('🎉 완성!');
           break;
-        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+        } else if (statusPayload?.status === 'failed' || statusPayload?.status === 'canceled') {
           throw new Error(statusData.error || '애니메이션 생성에 실패했습니다.');
         } else if (statusData.error) {
           throw new Error(statusData.error);
@@ -613,7 +614,7 @@ function App() {
         throw new Error(errorMessage);
       }
 
-      const { predictionId } = await response.json();
+      const { data: { predictionId } } = await response.json();
 
       const statusMessages = [
         '1970년대로 시간 여행 중...',
@@ -636,23 +637,24 @@ function App() {
         });
 
         const statusData = await statusRes.json();
+        const statusPayload = statusData.data;
 
-        if (statusData.status === 'succeeded') {
+        if (statusPayload?.status === 'succeeded') {
           // 원본 URL 저장 (프리미엄용)
-          setPremiumResultUrl(statusData.resultUrl);
+          setPremiumResultUrl(statusPayload.resultUrl);
 
           // 워터마크 + 블러 적용 (무료용)
           setLoadingMsg('워터마크 추가 중...');
           try {
-            const watermarkedUrl = await applyWatermarkAndBlur(statusData.resultUrl);
+            const watermarkedUrl = await applyWatermarkAndBlur(statusPayload.resultUrl);
             setResultUrl(watermarkedUrl);
           } catch (err) {
             console.error('워터마크 추가 실패:', err);
             // 실패 시 원본 표시
-            setResultUrl(statusData.resultUrl);
+            setResultUrl(statusPayload.resultUrl);
           }
           break;
-        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+        } else if (statusPayload?.status === 'failed' || statusPayload?.status === 'canceled') {
           throw new Error(statusData.error || '변환에 실패했습니다.');
         } else if (statusData.error) {
           throw new Error(statusData.error);
