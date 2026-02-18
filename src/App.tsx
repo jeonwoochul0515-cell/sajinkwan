@@ -305,7 +305,7 @@ function App() {
       content: {
         title: '17살로 돌아간 나 😎',
         description: '청춘사진관에서 1970-80년대 교복 입어봤어요!',
-        imageUrl: resultUrl || 'https://via.placeholder.com/800x600',
+        imageUrl: premiumResultUrl || 'https://via.placeholder.com/800x600',
         link: {
           mobileWebUrl: currentUrl,
           webUrl: currentUrl,
@@ -1301,26 +1301,31 @@ function App() {
               {/* 카카오톡 공유 */}
               <button
                 onClick={() => {
+                  // 졸업장은 캔버스에서 생성된 blob URL이라 카카오 서버가 접근 불가
+                  // 앱 링크만 공유하고 이미지는 저장 후 직접 첨부하도록 안내
                   if (window.Kakao) {
+                    const currentUrl = window.location.href.split('?')[0];
                     window.Kakao.Share.sendDefault({
                       objectType: 'feed',
                       content: {
                         title: '명예 졸업장 받았어요! 🎓',
-                        description: `${diplomaSchool} ${diplomaYear}년 졸업 - ${diplomaName}`,
-                        imageUrl: diplomaUrl,
+                        description: `${diplomaSchool} ${diplomaYear}년 졸업 - ${diplomaName} | 청춘사진관에서 만들기`,
+                        imageUrl: 'https://via.placeholder.com/800x600/8B4513/FFFFFF?text=%EC%B2%AD%EC%B6%98%EC%82%AC%EC%A7%84%EA%B4%80',
                         link: {
-                          mobileWebUrl: window.location.href.split('?')[0],
-                          webUrl: window.location.href.split('?')[0],
+                          mobileWebUrl: currentUrl,
+                          webUrl: currentUrl,
                         },
                       },
                       buttons: [{
                         title: '나도 졸업장 만들기',
                         link: {
-                          mobileWebUrl: window.location.href.split('?')[0],
-                          webUrl: window.location.href.split('?')[0],
+                          mobileWebUrl: currentUrl,
+                          webUrl: currentUrl,
                         },
                       }],
                     });
+                  } else {
+                    alert('졸업장 이미지를 저장한 뒤, 카카오톡 앱에서 직접 공유해주세요.');
                   }
                 }}
                 style={{
