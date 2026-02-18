@@ -6,6 +6,7 @@
 export interface Env {
   REPLICATE_API_TOKEN: string;
   POLAR_ACCESS_TOKEN: string;
+  POLAR_SANDBOX?: string; // 'true'이면 sandbox 환경 사용
 }
 
 // API 요청 타입

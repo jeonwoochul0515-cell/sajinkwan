@@ -5,7 +5,8 @@ import type { Env } from '../types';
 import { handlePreflight, jsonResponse } from '../utils/cors';
 import { errorToResponse, AuthenticationError, ValidationError, AppError } from '../utils/errors';
 
-const POLAR_API_BASE = 'https://api.polar.sh';
+const POLAR_API_BASE_PROD = 'https://api.polar.sh';
+const POLAR_API_BASE_SANDBOX = 'https://sandbox-api.polar.sh';
 
 export const onRequestOptions: PagesFunction<Env> = async (context) => {
   return handlePreflight(context.request);
@@ -25,8 +26,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new ValidationError('checkoutId가 필요합니다.');
     }
 
+    const isSandbox = env.POLAR_SANDBOX === 'true';
+    const apiBase = isSandbox ? POLAR_API_BASE_SANDBOX : POLAR_API_BASE_PROD;
+
     // Polar 체크아웃 상태 조회
-    const response = await fetch(`${POLAR_API_BASE}/v1/checkouts/${body.checkoutId}`, {
+    const response = await fetch(`${apiBase}/v1/checkouts/${body.checkoutId}`, {
       headers: {
         'Authorization': `Bearer ${env.POLAR_ACCESS_TOKEN}`,
       },

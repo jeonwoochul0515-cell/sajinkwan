@@ -185,7 +185,6 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
   if (!ctx) return;
   try {
     if (type === 'shutter') {
-      // 셔터: 화이트 노이즈 감쇠 + 기계음
       const n = ~~(ctx.sampleRate * 0.15);
       const buf = ctx.createBuffer(1, n, ctx.sampleRate);
       const d = buf.getChannelData(0);
@@ -214,7 +213,6 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
       osc.start(); osc.stop(ctx.currentTime + 0.05);
 
     } else if (type === 'advance') {
-      // 필름 감기: 짧은 노이즈 7연타
       for (let i = 0; i < 7; i++) {
         const t = ctx.currentTime + i * 0.048;
         const n = ~~(ctx.sampleRate * 0.028);
@@ -227,7 +225,6 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
       }
 
     } else if (type === 'success') {
-      // 성공 차임 (C-E-G-C')
       [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
         const t = ctx.currentTime + i * 0.13;
         const osc = ctx.createOscillator(); const g = ctx.createGain();
@@ -251,10 +248,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [premiumResultUrl, setPremiumResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-  const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationUrl, setAnimationUrl] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(true);
@@ -268,15 +263,13 @@ function App() {
     }
   }, []);
 
-  // 결제 완료 후 돌아왔을 때 URL의 checkout_id 확인
+  // 결제 완료 후 복귀 시 checkout_id 확인 → 자동 생성 시작
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkoutId = params.get('checkout_id');
     if (!checkoutId) return;
 
-    // URL 파라미터 즉시 제거
     window.history.replaceState({}, '', window.location.pathname);
-
     setIsCheckingPayment(true);
     setCurrentMode('uniform');
 
@@ -288,27 +281,22 @@ function App() {
       .then(r => r.json())
       .then(data => {
         if (data.data?.succeeded) {
-          // localStorage에서 사진 URL 복원
-          const savedUrl = localStorage.getItem('pendingPremiumUrl');
-          localStorage.removeItem('pendingPremiumUrl');
-          if (!savedUrl) {
-            setCheckoutError('결제는 완료됐지만 사진을 찾을 수 없습니다. 다시 변환 후 저장해주세요.');
+          const raw = localStorage.getItem('pendingGenerateData');
+          localStorage.removeItem('pendingGenerateData');
+          if (!raw) {
+            setCheckoutError('결제는 완료됐지만 생성 데이터를 찾을 수 없습니다. 다시 시도해주세요.');
             return;
           }
-          setPremiumResultUrl(savedUrl);
-          setIsPremiumUser(true);
-          sound('success');
-          const a = document.createElement('a');
-          a.href = savedUrl;
-          a.download = 'sajinkwan-premium.png';
-          a.click();
+          const { base64Image, styleOption: savedStyle } = JSON.parse(raw);
+          playSound('success');
+          executeGenerate(base64Image, savedStyle);
         } else {
-          localStorage.removeItem('pendingPremiumUrl');
+          localStorage.removeItem('pendingGenerateData');
           setCheckoutError('결제가 완료되지 않았습니다. 다시 시도해주세요.');
         }
       })
       .catch(() => {
-        localStorage.removeItem('pendingPremiumUrl');
+        localStorage.removeItem('pendingGenerateData');
         setCheckoutError('결제 확인 중 오류가 발생했습니다.');
       })
       .finally(() => setIsCheckingPayment(false));
@@ -323,38 +311,26 @@ function App() {
     setCurrentMode(mode);
   };
 
-  // 워터마크 + 블러
-  const applyWatermarkAndBlur = async (imageUrl: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  // 이미지 압축 (localStorage 저장용, 최대 1024px)
+  const compressImage = (file: File, maxPx = 1024): Promise<string> =>
+    new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      const objUrl = URL.createObjectURL(file);
       img.onload = () => {
+        URL.revokeObjectURL(objUrl);
+        let { width: w, height: h } = img;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { reject(new Error('Canvas context not available')); return; }
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        ctx.filter = 'blur(3px)';
-        ctx.drawImage(img, 0, 0);
-        ctx.filter = 'none';
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.font = `bold ${Math.max(24, img.width / 16)}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(-Math.PI / 6);
-        ctx.fillText('청춘사진관', 0, 0);
-        ctx.restore();
-        canvas.toBlob((blob) => {
-          if (blob) resolve(URL.createObjectURL(blob));
-          else reject(new Error('Failed to create blob'));
-        }, 'image/jpeg', 0.7);
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
       };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = imageUrl;
+      img.onerror = reject;
+      img.src = objUrl;
     });
-  };
 
   // 카카오 공유
   const shareToKakao = () => {
@@ -365,7 +341,7 @@ function App() {
       content: {
         title: '17살로 돌아간 나',
         description: '청춘사진관에서 1970-80년대 교복 입어봤어요!',
-        imageUrl: premiumResultUrl || 'https://via.placeholder.com/800x600',
+        imageUrl: resultUrl || 'https://via.placeholder.com/800x600',
         link: { mobileWebUrl: currentUrl, webUrl: currentUrl },
       },
       buttons: [{ title: '나도 젊어지기', link: { mobileWebUrl: currentUrl, webUrl: currentUrl } }],
@@ -374,7 +350,7 @@ function App() {
 
   // 애니메이션 생성
   const handleAnimate = async () => {
-    if (!premiumResultUrl && !resultUrl) { alert('먼저 사진을 변환해주세요!'); return; }
+    if (!resultUrl) { alert('먼저 사진을 변환해주세요!'); return; }
     sound('click');
     setIsAnimating(true);
     setError(null);
@@ -382,7 +358,7 @@ function App() {
       const response = await fetch('/api/viggle-animate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: premiumResultUrl || resultUrl }),
+        body: JSON.stringify({ imageUrl: resultUrl }),
       });
       if (!response.ok) {
         let msg = '애니메이션 생성에 실패했습니다.';
@@ -423,28 +399,32 @@ function App() {
     }
   };
 
-  const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-
+  // 생성 버튼 클릭 → 이미지 압축 후 결제 팝업
   const handleGenerate = async () => {
-    if (!selectedFile) { alert('학생, 사진도 안 올리고 변환하려니?'); return; }
-    sound('shutter');
-    setIsLoading(true);
-    setResultUrl(null);
-    setError(null);
+    if (!selectedFile) { alert('사진을 먼저 올려주세요!'); return; }
+    sound('click');
     try {
-      const base64Image = await toBase64(selectedFile);
+      const compressed = await compressImage(selectedFile);
       let finalStyle = styleOption;
       if (styleOption === 'auto') {
         const maleStyles = ['male_uniform', 'military_training', 'graduation', 'picnic', 'gym_class', 'classroom', 'group_photo'];
         const femaleStyles = ['female_uniform', 'graduation', 'picnic', 'gym_class', 'classroom', 'group_photo'];
-        const allStyles = Math.random() > 0.5 ? maleStyles : femaleStyles;
-        finalStyle = pickRandom(allStyles);
+        finalStyle = pickRandom(Math.random() > 0.5 ? maleStyles : femaleStyles);
       }
+      localStorage.setItem('pendingGenerateData', JSON.stringify({ base64Image: compressed, styleOption: finalStyle }));
+      setShowPaymentPopup(true);
+    } catch {
+      alert('이미지 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 실제 AI 생성 (결제 완료 후 호출)
+  const executeGenerate = async (base64Image: string, finalStyle: string) => {
+    setIsLoading(true);
+    setResultUrl(null);
+    setError(null);
+    playSound('shutter');
+    try {
       const config = STYLE_CONFIGS[finalStyle];
       const bg = pickRandom(BACKGROUNDS[finalStyle]);
       const promptText = `${config.prompt}, background: ${bg}, ${MASTER_SUFFIX}`;
@@ -470,16 +450,9 @@ function App() {
         const sd = await sr.json();
         const sp = sd.data;
         if (sp?.status === 'succeeded') {
-          setPremiumResultUrl(sp.resultUrl);
-          setLoadingMsg('미리보기 생성 중...');
-          try {
-            const wUrl = await applyWatermarkAndBlur(sp.resultUrl);
-            setResultUrl(wUrl);
-          } catch {
-            setResultUrl(sp.resultUrl);
-          }
-          sound('advance');
-          setTimeout(() => sound('success'), 400);
+          setResultUrl(sp.resultUrl);
+          playSound('advance');
+          setTimeout(() => playSound('success'), 400);
           break;
         } else if (sp?.status === 'failed' || sp?.status === 'canceled') {
           throw new Error(sd.error || '변환에 실패했습니다.');
@@ -497,10 +470,6 @@ function App() {
 
   // Polar 결제 시작
   const handleCheckout = async () => {
-    if (!premiumResultUrl) {
-      setCheckoutError('사진이 없습니다. 먼저 변환을 완료해주세요.');
-      return;
-    }
     setIsCreatingCheckout(true);
     setCheckoutError(null);
     try {
@@ -509,8 +478,6 @@ function App() {
       if (!res.ok || !data.data?.checkoutUrl) {
         throw new Error(data.error || '결제 페이지를 열 수 없습니다.');
       }
-      // 앱 새로고침 후에도 복원할 수 있도록 localStorage에 저장
-      localStorage.setItem('pendingPremiumUrl', premiumResultUrl);
       setShowPaymentPopup(false);
       window.location.href = data.data.checkoutUrl;
     } catch (err: any) {
@@ -525,7 +492,6 @@ function App() {
     <div className="v-screen">
       <div className="ios-spacer" />
 
-      {/* 헤더 */}
       <header className="v-header">
         <h1 className="v-title">청춘사진관</h1>
         <p className="v-subtitle">Memory Photo Studio</p>
@@ -588,6 +554,30 @@ function App() {
         </button>
       </section>
 
+      {/* 이용 방법 */}
+      <section className="how-section">
+        <div className="how-title">이용 방법</div>
+        <div className="how-steps">
+          <div className="how-step">
+            <span className="how-icon">📸</span>
+            <p className="how-label">사진 올리기</p>
+            <p className="how-desc">얼굴이 잘 보이는 사진</p>
+          </div>
+          <div className="how-arrow">→</div>
+          <div className="how-step">
+            <span className="how-icon">💳</span>
+            <p className="how-label">결제하기</p>
+            <p className="how-desc">단 ₩1,900</p>
+          </div>
+          <div className="how-arrow">→</div>
+          <div className="how-step">
+            <span className="how-icon">✨</span>
+            <p className="how-label">완성!</p>
+            <p className="how-desc">고화질 바로 저장</p>
+          </div>
+        </div>
+      </section>
+
       {/* 아카이브 노트 */}
       <section className="archive-note">
         <div className="archive-note-inner">
@@ -600,7 +590,6 @@ function App() {
         </div>
       </section>
 
-      {/* 하단 네비 */}
       <nav className="bottom-nav">
         <div className="nav-inner">
           <button className="nav-item active">
@@ -633,7 +622,6 @@ function App() {
   // ===== 교복 화면 =====
   const renderUniformScreen = () => (
     <div className="sub-screen">
-      {/* 헤더 */}
       <header className="sub-header">
         <button className="back-btn" onClick={() => navigate('home')}>← 홈으로</button>
         <h1 className="v-title" style={{ fontSize: '1.6rem' }}>교복 입어보기</h1>
@@ -663,7 +651,7 @@ function App() {
             )}
             <div className="overlay" />
             <div className="roll-tag">
-              {resultUrl ? 'Developed' : previewUrl ? 'Ready' : 'Roll #---'}
+              {resultUrl ? '✨ Premium' : previewUrl ? 'Ready' : 'Roll #---'}
             </div>
           </div>
           <div className="sprocket-col">
@@ -717,12 +705,15 @@ function App() {
               <option value="classroom">교실</option>
               <option value="group_photo">단체 사진</option>
             </select>
+
+            <div className="price-badge">💳 ₩1,900 · 결제 후 즉시 생성</div>
+
             <button
               onClick={handleGenerate}
-              disabled={isLoading || !selectedFile}
+              disabled={!selectedFile}
               className="gen-btn"
             >
-              {isLoading ? loadingMsg || '타임머신 가동 중...' : '📸 17살로 돌아가기'}
+              📸 결제하고 17살로 돌아가기
             </button>
           </div>
         </div>
@@ -759,19 +750,18 @@ function App() {
 
         {resultUrl && !isLoading && (
           <>
-            {/* 결과 필름 스트립 */}
             <div className="film-strip">
               <div className="sprocket-col">
                 {[...Array(5)].map((_, i) => <div key={i} className="sprocket" />)}
               </div>
               <div className="film-image-area">
                 <img
-                  src={isPremiumUser && premiumResultUrl ? premiumResultUrl : resultUrl}
+                  src={resultUrl}
                   alt="변환된 사진"
                   style={{ filter: 'sepia(0.15) brightness(0.95)' }}
                 />
                 <div className="overlay" />
-                <div className="roll-tag">{isPremiumUser ? 'Premium ✨' : 'Free'}</div>
+                <div className="roll-tag">✨ Premium</div>
               </div>
               <div className="sprocket-col">
                 {[...Array(5)].map((_, i) => <div key={i} className="sprocket" />)}
@@ -779,7 +769,6 @@ function App() {
             </div>
 
             <div className="result-actions">
-              {/* 살아 움직이게 */}
               {!animationUrl && (
                 <button
                   onClick={handleAnimate}
@@ -805,14 +794,20 @@ function App() {
                 </div>
               )}
 
-              {/* 카카오 공유 */}
               <button onClick={shareToKakao} className="action-btn kakao">
                 <span style={{ fontSize: 22 }}>💬</span>
                 카카오톡으로 자랑하기
               </button>
 
-              {/* 저장 */}
-              <button onClick={() => setShowPaymentPopup(true)} className="action-btn save">
+              <button
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = resultUrl;
+                  a.download = 'sajinkwan-premium.png';
+                  a.click();
+                }}
+                className="action-btn save"
+              >
                 <span style={{ fontSize: 20 }}>💾</span>
                 저장하기
               </button>
@@ -820,14 +815,13 @@ function App() {
           </>
         )}
 
-        {!isLoading && !resultUrl && !error && (
+        {!isLoading && !isCheckingPayment && !resultUrl && !error && !checkoutError && (
           <div className="empty-box">
-            <p>아직 현상된 사진이 없습니다.<br />위에서 사진을 올리고 변환해주세요.</p>
+            <p>위에서 사진을 올리고<br />결제 후 변환해보세요.</p>
           </div>
         )}
       </section>
 
-      {/* 하단 네비 */}
       <nav className="bottom-nav">
         <div className="nav-inner">
           <button className="nav-item" onClick={() => navigate('home')}>
@@ -903,36 +897,27 @@ function App() {
     return (
       <div className="popup-overlay" onClick={() => { if (!isCreatingCheckout) setShowPaymentPopup(false); }}>
         <div className="popup-card" onClick={(e) => e.stopPropagation()}>
-          <h2>💎 고화질 저장</h2>
-          <p>AI가 생성한 원본 고화질 사진을<br />바로 다운로드 받으시겠습니까?</p>
-          {checkoutError && (
-            <p className="popup-error">{checkoutError}</p>
-          )}
+          <div className="popup-icon">📸</div>
+          <h2>결제 후 바로 생성!</h2>
+          <p>결제가 완료되면 AI가 즉시<br />1970년대 사진을 만들어드립니다.</p>
+          <div className="popup-price">₩1,900</div>
+          {checkoutError && <p className="popup-error">{checkoutError}</p>}
           <div className="popup-btns">
             <button
               className="popup-btn-primary"
               disabled={isCreatingCheckout}
               onClick={handleCheckout}
             >
-              {isCreatingCheckout ? '결제 페이지 이동 중...' : '네 (₩1,900 결제)'}
-            </button>
-            <button
-              className="popup-btn-secondary"
-              disabled={isCreatingCheckout}
-              onClick={() => {
-                setShowPaymentPopup(false);
-                if (resultUrl) {
-                  const a = document.createElement('a');
-                  a.href = resultUrl;
-                  a.download = 'cheonchun-photo-free.png';
-                  a.click();
-                }
-              }}
-            >
-              아니오 (미리보기 저장)
+              {isCreatingCheckout ? '결제 페이지 이동 중...' : '결제하고 생성하기'}
             </button>
           </div>
-          <button className="popup-btn-cancel" disabled={isCreatingCheckout} onClick={() => setShowPaymentPopup(false)}>취소</button>
+          <button
+            className="popup-btn-cancel"
+            disabled={isCreatingCheckout}
+            onClick={() => setShowPaymentPopup(false)}
+          >
+            취소
+          </button>
         </div>
       </div>
     );
@@ -940,7 +925,6 @@ function App() {
 
   return (
     <div className="app-root">
-      {/* 사운드 토글 */}
       <button className="sound-toggle" onClick={() => setSoundOn(!soundOn)}>
         <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
           {soundOn ? 'volume_up' : 'volume_off'}
