@@ -2,14 +2,14 @@
 // 역할: Replicate Moore-AnimateAnyone 모델로 이미지를 애니메이션으로 변환
 // 참고: https://replicate.com/zsxkib/moore-animateanyone
 
-interface Env {
-  REPLICATE_API_TOKEN: string;
-}
+import type { Env, AnimateRequest } from '../types';
+import { createLogger } from '../utils/logger';
+import { validateAnimateRequest } from '../utils/validators';
+import { createReplicateClient } from '../utils/replicate';
+import { errorToResponse, AuthenticationError } from '../utils/errors';
+import { handlePreflight, jsonResponse } from '../utils/cors';
 
-interface RequestBody {
-  imageUrl: string;
-  motionVideoUrl?: string; // 춤 동작 참조 영상 URL (선택)
-}
+const MOORE_ANIMATEANYONE_VERSION = '8186f4c0e82888b14a8e045c47e59e30479da9e4b29979ae9b9b5901ecf42571';
 
 // 기본 춤 동작 영상 URL들 (public 영상 사용)
 const DEFAULT_DANCE_VIDEOS = [
@@ -17,81 +17,84 @@ const DEFAULT_DANCE_VIDEOS = [
   "https://replicate.delivery/pbxt/KJDdA2f0iP7a3LQWR4GQMbY4LlTfLEy2QVyuJMWHp9Q8mBiB/pose_video.mp4",
 ];
 
+export const onRequestOptions: PagesFunction<Env> = async (context) => {
+  return handlePreflight(context.request);
+};
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const startTime = Date.now();
+  const { request, env } = context;
+  const origin = request.headers.get('Origin') || undefined;
+  const logger = createLogger(request, '/api/viggle-animate');
+
   try {
-    const { request, env } = context;
-    const { imageUrl, motionVideoUrl } = await request.json<RequestBody>();
+    logger.logRequestStart('POST', '/api/viggle-animate');
 
+    // 환경 변수 검증
     if (!env.REPLICATE_API_TOKEN) {
-      return new Response(JSON.stringify({ error: 'REPLICATE_API_TOKEN이 설정되지 않았습니다.' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw new AuthenticationError('REPLICATE_API_TOKEN이 설정되지 않았습니다.');
     }
 
-    if (!imageUrl) {
-      return new Response(JSON.stringify({ error: 'imageUrl이 필요합니다.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // 요청 본문 파싱
+    const requestData = await request.json<AnimateRequest>();
+
+    // 입력 검증
+    validateAnimateRequest(requestData);
+
+    const { imageUrl, motionVideoUrl } = requestData;
 
     // 랜덤 기본 춤 동작 선택 또는 사용자 제공 영상 사용
     const motionVideo = motionVideoUrl || DEFAULT_DANCE_VIDEOS[Math.floor(Math.random() * DEFAULT_DANCE_VIDEOS.length)];
 
+    logger.info('Animation 생성 시작', {
+      imageUrl: imageUrl.substring(0, 100),
+      motionVideo: motionVideo.substring(0, 100),
+    });
+
+    // Replicate 클라이언트 생성
+    const replicateClient = createReplicateClient(env.REPLICATE_API_TOKEN, logger);
+
     // Moore-AnimateAnyone 모델 호출
-    const startResponse = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Token ${env.REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version: "8186f4c0e82888b14a8e045c47e59e30479da9e4b29979ae9b9b5901ecf42571",
-        input: {
-          reference_image: imageUrl,
-          motion_video: motionVideo,
-          seed: Math.floor(Math.random() * 1000000),
-          steps: 25, // 품질과 속도 균형
+    const prediction = await replicateClient.createPrediction({
+      version: MOORE_ANIMATEANYONE_VERSION,
+      input: {
+        reference_image: imageUrl,
+        motion_video: motionVideo,
+        seed: Math.floor(Math.random() * 1000000),
+        steps: 25, // 품질과 속도 균형
+      }
+    });
+
+    const duration = Date.now() - startTime;
+    logger.logRequestEnd('POST', '/api/viggle-animate', 201, duration);
+
+    return jsonResponse(
+      {
+        success: true,
+        data: {
+          predictionId: prediction.id,
+          status: prediction.status,
         }
-      })
-    });
-
-    const responseText = await startResponse.text();
-    let prediction: { id?: string; error?: string };
-
-    try {
-      prediction = JSON.parse(responseText);
-    } catch {
-      return new Response(JSON.stringify({
-        error: `Replicate API 응답 파싱 오류: ${responseText.substring(0, 200)}`
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (startResponse.status !== 201) {
-      return new Response(JSON.stringify({
-        error: prediction.error || `Replicate API 에러 (상태코드: ${startResponse.status})`
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ predictionId: prediction.id }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
+      },
+      201,
+      origin
+    );
 
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return new Response(JSON.stringify({
-      error: `서버 오류가 발생했습니다: ${message}`
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    const duration = Date.now() - startTime;
+    logger.error('Viggle Animate API 에러', error, { duration });
+
+    const errorResponse = errorToResponse(error);
+    // CORS 헤더 추가
+    const corsHeaders = origin ? { 'Access-Control-Allow-Origin': origin } : {};
+    const headers = new Headers(errorResponse.headers);
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      headers.set(key, value);
+    });
+
+    return new Response(errorResponse.body, {
+      status: errorResponse.status,
+      headers,
     });
   }
 };
