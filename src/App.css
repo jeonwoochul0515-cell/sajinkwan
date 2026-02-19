@@ -1036,125 +1036,365 @@ body {
   line-height: 1.8;
 }
 
-/* ===== 아카이브 화면 ===== */
-.archive-intro {
-  padding: 20px 24px 8px;
-  text-align: center;
-}
-
-.archive-intro p {
-  font-size: 13px;
-  font-style: italic;
-  color: var(--stone-500);
-  line-height: 1.8;
-}
-
-.archive-grid {
-  padding: 16px 16px 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 14px;
-}
-
-.archive-card {
-  background: white;
-  padding: 7px 7px 28px;
-  border: 1px solid var(--stone-200);
-  box-shadow: 2px 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
-  transform: rotate(var(--rotate, 0deg));
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: default;
-}
-
-.archive-card:hover {
-  transform: rotate(0deg) scale(1.03);
-  box-shadow: 4px 8px 24px rgba(0,0,0,0.16);
+/* ===== 아카이브 화면 (영화 클래식) ===== */
+.arc-screen {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 120px;
+  position: relative;
   z-index: 10;
+  background: #0f0d0b;
+  min-height: 100dvh;
+}
+
+/* 헤더 */
+.arc-header {
+  position: relative;
+  padding: 52px 24px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #1a1410 0%, #0f0d0b 100%);
+}
+
+.arc-back {
+  position: absolute !important;
+  top: 16px;
+  left: 16px;
+  background: rgba(255,255,255,0.07) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: rgba(255,255,255,0.55) !important;
+}
+
+.arc-eyebrow {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.arc-title {
+  font-family: 'Newsreader', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-style: italic;
+  color: #f5ede0;
+  line-height: 1.1;
+}
+
+.arc-period {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: rgba(245,237,224,0.35);
+  margin-top: 8px;
+}
+
+.arc-header-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.arc-header-rule span:not(.arc-rule-dot) {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  display: block;
+}
+
+.arc-rule-dot {
+  width: 4px !important;
+  height: 4px !important;
+  background: var(--primary) !important;
+  border-radius: 50%;
+  flex: none !important;
+}
+
+/* 피처드 카드 */
+.arc-featured {
+  margin: 0 16px;
+  cursor: pointer;
   position: relative;
 }
 
-.archive-card-img-wrap {
+.arc-featured-img-wrap {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: var(--stone-200);
+  border-radius: 2px;
 }
 
-.archive-card-img {
+.arc-featured-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(35%) sepia(0.25) brightness(0.88) contrast(1.05);
-  transition: filter 0.3s;
+  filter: grayscale(30%) sepia(0.4) brightness(0.75) contrast(1.1);
+  transition: transform 0.5s ease, filter 0.4s;
 }
 
-.archive-card:hover .archive-card-img {
-  filter: grayscale(15%) sepia(0.15) brightness(0.95);
+.arc-featured:hover .arc-featured-img {
+  transform: scale(1.03);
+  filter: grayscale(15%) sepia(0.25) brightness(0.85);
 }
 
-.archive-card-overlay {
+.arc-featured-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 55%, rgba(28,25,23,0.55) 100%);
+  background:
+    radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to top, rgba(10,8,6,0.92) 0%, transparent 50%);
   pointer-events: none;
 }
 
-.archive-year-stamp {
+.arc-featured-meta {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 18px;
+}
+
+.arc-reel-tag {
+  font-family: 'Special Elite', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.arc-featured-title {
+  font-family: 'Newsreader', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  color: #f5ede0;
+  line-height: 1.2;
+  margin-bottom: 5px;
+}
+
+.arc-featured-desc {
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(245,237,224,0.6);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.arc-featured-loc {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(245,237,224,0.4);
+}
+
+.arc-featured-loc .material-symbols-outlined {
+  font-size: 11px !important;
+}
+
+.arc-featured-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--primary);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 1px;
+}
+
+/* 섹션 라벨 */
+.arc-section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px 16px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.25);
+}
+
+.arc-section-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  display: block;
+}
+
+/* 그리드 */
+.arc-grid {
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 12px;
+}
+
+.arc-card {
+  cursor: pointer;
+}
+
+.arc-card-img-wrap {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+.arc-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(40%) sepia(0.35) brightness(0.72) contrast(1.08);
+  transition: transform 0.4s, filter 0.3s;
+}
+
+.arc-card:hover .arc-card-img {
+  transform: scale(1.05);
+  filter: grayscale(20%) sepia(0.2) brightness(0.85);
+}
+
+.arc-card-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,8,6,0.85) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.arc-card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 10px;
+}
+
+.arc-card-title {
+  font-family: 'Newsreader', serif;
+  font-size: 13px;
+  font-weight: 700;
+  font-style: italic;
+  color: #f5ede0;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.arc-card-loc {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(245,237,224,0.4);
+}
+
+.arc-card-year {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: rgba(0,0,0,0.45);
-  color: rgba(255,255,255,0.85);
   font-family: 'Special Elite', monospace;
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.12em;
-  padding: 3px 7px;
-  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.4);
+  padding: 2px 6px;
 }
 
-.archive-card-body {
-  padding: 8px 4px 0;
-}
-
-.archive-tag {
-  display: inline-block;
-  background: #fff8f0;
-  border: 1px solid rgba(207,99,23,0.3);
-  color: var(--primary);
-  font-size: 9px;
+.arc-card-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(207,99,23,0.85);
+  color: white;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 2px 7px;
+  border-radius: 1px;
+}
+
+.arc-card-desc {
+  font-size: 11px;
+  font-style: italic;
+  color: rgba(245,237,224,0.35);
+  line-height: 1.5;
+  padding: 0 2px;
+}
+
+/* CTA 배너 */
+.arc-cta-banner {
+  margin: 32px 16px 0;
+  background: linear-gradient(135deg, #2a1a0a 0%, #1a0f05 100%);
+  border: 1px solid rgba(207,99,23,0.35);
   border-radius: 2px;
-  margin-bottom: 5px;
-}
-
-.archive-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--stone-800);
-  line-height: 1.3;
-  margin-bottom: 3px;
-  font-style: italic;
-}
-
-.archive-location {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 10px;
-  color: var(--stone-400);
-  line-height: 1.2;
-}
-
-.archive-footer-note {
+  padding: 24px 20px;
   text-align: center;
-  padding: 0 24px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.arc-cta-banner:hover {
+  border-color: rgba(207,99,23,0.7);
+}
+
+.arc-cta-eyebrow {
   font-size: 10px;
-  color: var(--stone-300);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,237,224,0.4);
+  margin-bottom: 8px;
+}
+
+.arc-cta-text {
+  font-family: 'Newsreader', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
   font-style: italic;
+  color: #f5ede0;
+  margin-bottom: 6px;
+}
+
+.arc-cta-sub {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 푸터 */
+.arc-footer {
+  text-align: center;
+  padding: 24px 24px 0;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.12);
+  font-style: italic;
+}
+
+/* 아카이브 화면 하단 네비 오버라이드 */
+.arc-screen .bottom-nav {
+  background: rgba(15,13,11,0.95) !important;
+  border-top-color: rgba(255,255,255,0.07) !important;
+}
+
+.arc-screen .nav-item {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.arc-screen .nav-item:hover {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.arc-screen .nav-item.active {
+  color: var(--primary) !important;
+}
+
+.arc-screen .home-indicator {
+  background: rgba(255,255,255,0.1) !important;
 }
 
 /* ===== 사운드 토글 ===== */

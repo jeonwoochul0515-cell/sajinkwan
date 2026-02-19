@@ -240,14 +240,14 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
 
 // ===== 아카이브 더미 데이터 =====
 const ARCHIVE_ITEMS = [
-  { id: 1, imageUrl: 'https://randomuser.me/api/portraits/men/45.jpg', year: '1978', title: '봄 소풍의 기억', location: '경주 불국사', tag: '소풍', rotate: '-1.5deg' },
-  { id: 2, imageUrl: 'https://randomuser.me/api/portraits/women/22.jpg', year: '1982', title: '졸업 기념사진', location: '서울 ○○고등학교', tag: '졸업', rotate: '1.2deg' },
-  { id: 3, imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg', year: '1975', title: '교련 훈련 중', location: '학교 운동장', tag: '교련복', rotate: '-0.8deg' },
-  { id: 4, imageUrl: 'https://randomuser.me/api/portraits/women/54.jpg', year: '1980', title: '가을 단풍 소풍', location: '설악산', tag: '소풍', rotate: '2deg' },
-  { id: 5, imageUrl: 'https://randomuser.me/api/portraits/men/67.jpg', year: '1977', title: '교실의 오후', location: '3학년 2반', tag: '교실', rotate: '-1.2deg' },
-  { id: 6, imageUrl: 'https://randomuser.me/api/portraits/women/38.jpg', year: '1984', title: '가을 체육 대회', location: '학교 운동장', tag: '체육', rotate: '0.7deg' },
-  { id: 7, imageUrl: 'https://randomuser.me/api/portraits/men/12.jpg', year: '1979', title: '단체 기념사진', location: '학교 정문 앞', tag: '단체', rotate: '-2deg' },
-  { id: 8, imageUrl: 'https://randomuser.me/api/portraits/women/71.jpg', year: '1983', title: '교정 벚꽃 아래', location: '○○여고', tag: '교복', rotate: '1.5deg' },
+  { id: 1, imageUrl: 'https://images.pexels.com/photos/18285588/pexels-photo-18285588.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1978', title: '봄 소풍의 기억', location: '경주 불국사', tag: '소풍', desc: '교복 차림으로 떠난 첫 소풍' },
+  { id: 2, imageUrl: 'https://images.pexels.com/photos/2508849/pexels-photo-2508849.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1982', title: '졸업 기념사진', location: '서울 ○○여고', tag: '졸업', desc: '그 시절 마지막 봄날의 기록' },
+  { id: 3, imageUrl: 'https://images.pexels.com/photos/2322999/pexels-photo-2322999.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1975', title: '교련 훈련', location: '학교 운동장', tag: '교련복', desc: '구령에 맞춰 일사불란하게' },
+  { id: 4, imageUrl: 'https://images.pexels.com/photos/8062965/pexels-photo-8062965.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1980', title: '가을 소풍', location: '설악산', tag: '소풍', desc: '단풍이 물든 산길을 걷던 날' },
+  { id: 5, imageUrl: 'https://images.pexels.com/photos/8453027/pexels-photo-8453027.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1977', title: '교실의 오후', location: '3학년 2반', tag: '교실', desc: '창문으로 스며드는 햇살 아래' },
+  { id: 6, imageUrl: 'https://images.pexels.com/photos/18402062/pexels-photo-18402062.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1984', title: '체육 대회', location: '학교 운동장', tag: '체육', desc: '전교생이 함께한 가을 운동회' },
+  { id: 7, imageUrl: 'https://images.pexels.com/photos/3053485/pexels-photo-3053485.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1979', title: '단체 기념사진', location: '학교 정문 앞', tag: '단체', desc: '졸업 전 마지막으로 찍은 우리 반' },
+  { id: 8, imageUrl: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop', year: '1983', title: '교정 벚꽃 아래', location: '○○여고', tag: '교복', desc: '벚꽃이 흩날리던 봄날의 교정' },
 ];
 
 type FeatureMode = 'home' | 'uniform' | 'dance';
@@ -865,53 +865,73 @@ function App() {
 
   // ===== 아카이브 화면 =====
   const renderDanceScreen = () => (
-    <div className="sub-screen">
-      <header className="sub-header">
-        <button className="back-btn" onClick={() => navigate('home')}>← 홈으로</button>
-        <h1 className="v-title" style={{ fontSize: '1.6rem' }}>추억 아카이브</h1>
-        <p className="v-subtitle">Memory Archives · 1970–1984</p>
-        <div className="v-divider">
-          <span className="v-line" />
-          <span className="v-est">그 시절 그대로</span>
-          <span className="v-line" />
+    <div className="arc-screen">
+      {/* 시네마 헤더 */}
+      <header className="arc-header">
+        <button className="back-btn arc-back" onClick={() => navigate('home')}>← 홈으로</button>
+        <div className="arc-header-inner">
+          <p className="arc-eyebrow">Memory Archives</p>
+          <h1 className="arc-title">그 시절, 그 교복</h1>
+          <p className="arc-period">1970 — 1984</p>
+        </div>
+        <div className="arc-header-rule">
+          <span /><span className="arc-rule-dot" /><span />
         </div>
       </header>
 
-      <div className="archive-intro">
-        <p>청춘사진관을 거쳐간 추억들입니다.<br />당신의 사진도 이 아카이브에 남겨보세요.</p>
+      {/* 피처드 (첫 번째 카드 - 크게) */}
+      <div className="arc-featured" onClick={() => navigate('uniform')}>
+        <div className="arc-featured-img-wrap">
+          <img src={ARCHIVE_ITEMS[0].imageUrl} alt={ARCHIVE_ITEMS[0].title} className="arc-featured-img" loading="lazy" />
+          <div className="arc-featured-vignette" />
+          <div className="arc-featured-meta">
+            <span className="arc-reel-tag">KODAK · {ARCHIVE_ITEMS[0].year}</span>
+            <p className="arc-featured-title">{ARCHIVE_ITEMS[0].title}</p>
+            <p className="arc-featured-desc">{ARCHIVE_ITEMS[0].desc}</p>
+            <span className="arc-featured-loc">
+              <span className="material-symbols-outlined" style={{ fontSize: 11 }}>location_on</span>
+              {ARCHIVE_ITEMS[0].location}
+            </span>
+          </div>
+          <span className="arc-featured-badge">{ARCHIVE_ITEMS[0].tag}</span>
+        </div>
       </div>
 
-      <div className="archive-grid">
-        {ARCHIVE_ITEMS.map((item) => (
-          <div
-            key={item.id}
-            className="archive-card"
-            style={{ '--rotate': item.rotate } as React.CSSProperties}
-          >
-            <div className="archive-card-img-wrap">
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="archive-card-img"
-                loading="lazy"
-              />
-              <div className="archive-card-overlay" />
-              <span className="archive-year-stamp">{item.year}</span>
+      {/* 섹션 라벨 */}
+      <div className="arc-section-label">
+        <span className="arc-section-line" />
+        <span>All Memories</span>
+        <span className="arc-section-line" />
+      </div>
+
+      {/* 2열 그리드 */}
+      <div className="arc-grid">
+        {ARCHIVE_ITEMS.slice(1).map((item) => (
+          <div key={item.id} className="arc-card" onClick={() => navigate('uniform')}>
+            <div className="arc-card-img-wrap">
+              <img src={item.imageUrl} alt={item.title} className="arc-card-img" loading="lazy" />
+              <div className="arc-card-vignette" />
+              <div className="arc-card-info">
+                <p className="arc-card-title">{item.title}</p>
+                <p className="arc-card-loc">{item.location}</p>
+              </div>
+              <span className="arc-card-year">{item.year}</span>
+              <span className="arc-card-tag">{item.tag}</span>
             </div>
-            <div className="archive-card-body">
-              <span className="archive-tag">{item.tag}</span>
-              <p className="archive-title">{item.title}</p>
-              <p className="archive-location">
-                <span className="material-symbols-outlined" style={{ fontSize: 11 }}>location_on</span>
-                {item.location}
-              </p>
-            </div>
+            <p className="arc-card-desc">{item.desc}</p>
           </div>
         ))}
       </div>
 
-      <div className="archive-footer-note">
-        <span>· Images are illustrative · </span>
+      {/* CTA 배너 */}
+      <div className="arc-cta-banner" onClick={() => navigate('uniform')}>
+        <p className="arc-cta-eyebrow">당신의 이야기를 남겨보세요</p>
+        <p className="arc-cta-text">📸 나도 17살로 돌아가기</p>
+        <p className="arc-cta-sub">₩1,900 · AI 즉시 생성</p>
+      </div>
+
+      <div className="arc-footer">
+        <span>Photos for illustration only · Pexels Free License</span>
       </div>
 
       <nav className="bottom-nav">
