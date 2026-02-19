@@ -240,14 +240,14 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
 
 // ===== 아카이브 더미 데이터 =====
 const ARCHIVE_ITEMS = [
-  { id: 1, imageUrl: 'https://picsum.photos/seed/sajin01/400/500', year: '1978', title: '봄 소풍의 기억', location: '경주 불국사', tag: '소풍', rotate: '-1.5deg' },
-  { id: 2, imageUrl: 'https://picsum.photos/seed/sajin02/400/500', year: '1982', title: '졸업 기념사진', location: '서울 ○○고등학교', tag: '졸업', rotate: '1.2deg' },
-  { id: 3, imageUrl: 'https://picsum.photos/seed/sajin03/400/500', year: '1975', title: '교련 훈련 중', location: '학교 운동장', tag: '교련복', rotate: '-0.8deg' },
-  { id: 4, imageUrl: 'https://picsum.photos/seed/sajin04/400/500', year: '1980', title: '가을 단풍 소풍', location: '설악산', tag: '소풍', rotate: '2deg' },
-  { id: 5, imageUrl: 'https://picsum.photos/seed/sajin05/400/500', year: '1977', title: '교실의 오후', location: '3학년 2반', tag: '교실', rotate: '-1.2deg' },
-  { id: 6, imageUrl: 'https://picsum.photos/seed/sajin06/400/500', year: '1984', title: '가을 체육 대회', location: '학교 운동장', tag: '체육', rotate: '0.7deg' },
-  { id: 7, imageUrl: 'https://picsum.photos/seed/sajin07/400/500', year: '1979', title: '단체 기념사진', location: '학교 정문 앞', tag: '단체', rotate: '-2deg' },
-  { id: 8, imageUrl: 'https://picsum.photos/seed/sajin08/400/500', year: '1983', title: '교정 벚꽃 아래', location: '○○여고', tag: '교복', rotate: '1.5deg' },
+  { id: 1, imageUrl: 'https://randomuser.me/api/portraits/men/45.jpg', year: '1978', title: '봄 소풍의 기억', location: '경주 불국사', tag: '소풍', rotate: '-1.5deg' },
+  { id: 2, imageUrl: 'https://randomuser.me/api/portraits/women/22.jpg', year: '1982', title: '졸업 기념사진', location: '서울 ○○고등학교', tag: '졸업', rotate: '1.2deg' },
+  { id: 3, imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg', year: '1975', title: '교련 훈련 중', location: '학교 운동장', tag: '교련복', rotate: '-0.8deg' },
+  { id: 4, imageUrl: 'https://randomuser.me/api/portraits/women/54.jpg', year: '1980', title: '가을 단풍 소풍', location: '설악산', tag: '소풍', rotate: '2deg' },
+  { id: 5, imageUrl: 'https://randomuser.me/api/portraits/men/67.jpg', year: '1977', title: '교실의 오후', location: '3학년 2반', tag: '교실', rotate: '-1.2deg' },
+  { id: 6, imageUrl: 'https://randomuser.me/api/portraits/women/38.jpg', year: '1984', title: '가을 체육 대회', location: '학교 운동장', tag: '체육', rotate: '0.7deg' },
+  { id: 7, imageUrl: 'https://randomuser.me/api/portraits/men/12.jpg', year: '1979', title: '단체 기념사진', location: '학교 정문 앞', tag: '단체', rotate: '-2deg' },
+  { id: 8, imageUrl: 'https://randomuser.me/api/portraits/women/71.jpg', year: '1983', title: '교정 벚꽃 아래', location: '○○여고', tag: '교복', rotate: '1.5deg' },
 ];
 
 type FeatureMode = 'home' | 'uniform' | 'dance';
