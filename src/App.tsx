@@ -238,6 +238,18 @@ function playSound(type: 'shutter' | 'click' | 'advance' | 'success') {
   } catch { /* ignore */ }
 }
 
+// ===== 아카이브 더미 데이터 =====
+const ARCHIVE_ITEMS = [
+  { id: 1, imageUrl: 'https://picsum.photos/seed/sajin01/400/500', year: '1978', title: '봄 소풍의 기억', location: '경주 불국사', tag: '소풍', rotate: '-1.5deg' },
+  { id: 2, imageUrl: 'https://picsum.photos/seed/sajin02/400/500', year: '1982', title: '졸업 기념사진', location: '서울 ○○고등학교', tag: '졸업', rotate: '1.2deg' },
+  { id: 3, imageUrl: 'https://picsum.photos/seed/sajin03/400/500', year: '1975', title: '교련 훈련 중', location: '학교 운동장', tag: '교련복', rotate: '-0.8deg' },
+  { id: 4, imageUrl: 'https://picsum.photos/seed/sajin04/400/500', year: '1980', title: '가을 단풍 소풍', location: '설악산', tag: '소풍', rotate: '2deg' },
+  { id: 5, imageUrl: 'https://picsum.photos/seed/sajin05/400/500', year: '1977', title: '교실의 오후', location: '3학년 2반', tag: '교실', rotate: '-1.2deg' },
+  { id: 6, imageUrl: 'https://picsum.photos/seed/sajin06/400/500', year: '1984', title: '가을 체육 대회', location: '학교 운동장', tag: '체육', rotate: '0.7deg' },
+  { id: 7, imageUrl: 'https://picsum.photos/seed/sajin07/400/500', year: '1979', title: '단체 기념사진', location: '학교 정문 앞', tag: '단체', rotate: '-2deg' },
+  { id: 8, imageUrl: 'https://picsum.photos/seed/sajin08/400/500', year: '1983', title: '교정 벚꽃 아래', location: '○○여고', tag: '교복', rotate: '1.5deg' },
+];
+
 type FeatureMode = 'home' | 'uniform' | 'dance';
 
 function App() {
@@ -851,17 +863,57 @@ function App() {
     </div>
   );
 
-  // ===== 댄스 화면 =====
+  // ===== 아카이브 화면 =====
   const renderDanceScreen = () => (
     <div className="sub-screen">
       <header className="sub-header">
         <button className="back-btn" onClick={() => navigate('home')}>← 홈으로</button>
-        <h1 className="v-title" style={{ fontSize: '1.6rem' }}>춤추는 짤</h1>
-        <p className="v-subtitle">Coming Soon</p>
+        <h1 className="v-title" style={{ fontSize: '1.6rem' }}>추억 아카이브</h1>
+        <p className="v-subtitle">Memory Archives · 1970–1984</p>
+        <div className="v-divider">
+          <span className="v-line" />
+          <span className="v-est">그 시절 그대로</span>
+          <span className="v-line" />
+        </div>
       </header>
-      <div className="coming-soon">
-        <p>곧 출시됩니다!<br />내 얼굴로 춤추는 영상을 만들어보세요.</p>
+
+      <div className="archive-intro">
+        <p>청춘사진관을 거쳐간 추억들입니다.<br />당신의 사진도 이 아카이브에 남겨보세요.</p>
       </div>
+
+      <div className="archive-grid">
+        {ARCHIVE_ITEMS.map((item) => (
+          <div
+            key={item.id}
+            className="archive-card"
+            style={{ '--rotate': item.rotate } as React.CSSProperties}
+          >
+            <div className="archive-card-img-wrap">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="archive-card-img"
+                loading="lazy"
+              />
+              <div className="archive-card-overlay" />
+              <span className="archive-year-stamp">{item.year}</span>
+            </div>
+            <div className="archive-card-body">
+              <span className="archive-tag">{item.tag}</span>
+              <p className="archive-title">{item.title}</p>
+              <p className="archive-location">
+                <span className="material-symbols-outlined" style={{ fontSize: 11 }}>location_on</span>
+                {item.location}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="archive-footer-note">
+        <span>· Images are illustrative · </span>
+      </div>
+
       <nav className="bottom-nav">
         <div className="nav-inner">
           <button className="nav-item" onClick={() => navigate('home')}>
