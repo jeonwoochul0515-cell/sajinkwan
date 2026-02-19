@@ -259,7 +259,7 @@ function App() {
 
   useEffect(() => {
     if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init('YOUR_KAKAO_APP_KEY');
+      window.Kakao.init('9c78946200f5be3c591f823f2d5703fc');
     }
   }, []);
 
